@@ -9,6 +9,7 @@ from app.services.llm_service import llm_service
 from app.services.poster_service import poster_service
 from app.services.qr_service import qr_service
 from app.services.wechat_service import wechat_service
+from app.services.xiaohongshu_service import xiaohongshu_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/recruitment", tags=["游戏玩家用研招募"])
@@ -143,6 +144,47 @@ async def _read_optional_image(file: Optional[UploadFile], label: str) -> Option
             detail=f"{label}超过 2MB 限制（当前：{len(image_bytes) / 1024 / 1024:.1f}MB）",
         )
     return image_bytes
+
+
+@router.post("/generate-xiaohongshu-poster", summary="生成小红书招募海报")
+async def generate_xiaohongshu_poster(
+    city: str = Form(..., description="活动城市"),
+    game_category: str = Form(..., description="游戏品类/名称"),
+    reward_amount: str = Form(..., description="礼金金额"),
+    player_requirement_desc: str = Form(..., description="玩家要求"),
+    game_examples: str = Form(..., description="游戏举例"),
+    activity_date: str = Form(..., description="活动时间"),
+    duration: str = Form(..., description="测试时长"),
+    location: str = Form(..., description="活动地点"),
+    activity_description: str = Form(..., description="活动内容"),
+    project_id: str = Form(..., description="项目编号"),
+    extra_notes: Optional[str] = Form(default=None, description="补充说明"),
+) -> dict:
+    form = DemandForm(
+        city=city,
+        game_category=game_category,
+        reward_amount=reward_amount,
+        player_requirement_desc=player_requirement_desc,
+        game_examples=game_examples,
+        activity_date=activity_date,
+        duration=duration,
+        location=location,
+        activity_description=activity_description,
+        project_id=project_id,
+        extra_notes=extra_notes,
+    )
+
+    try:
+        poster_result = await xiaohongshu_service.render_poster(form)
+        return {
+            "success": True,
+            "xiaohongshu_image_url": poster_result["url"],
+            "xiaohongshu_image_path": poster_result["path"],
+            "message": "小红书海报生成成功。",
+        }
+    except RuntimeError as e:
+        logger.error(f"小红书海报生成失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post(

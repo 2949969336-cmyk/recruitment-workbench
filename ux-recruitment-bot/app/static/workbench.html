@@ -250,6 +250,16 @@
       background: #5d12e8;
     }
 
+    .xhs-image {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff7dd;
+    }
+
     .empty {
       min-height: 360px;
       display: grid;
@@ -417,8 +427,10 @@
           <button class="primary" id="generateBtn" type="submit">生成预览</button>
           <button class="secondary" id="copyBtn" type="button" disabled>复制文案</button>
           <button class="secondary" id="publishBtn" type="button" disabled>推送草稿箱</button>
+          <button class="secondary" id="xhsBtn" type="button">生成小红书</button>
           <a class="button-link secondary" id="downloadBtn" href="#" download hidden>下载海报</a>
           <a class="button-link secondary" id="downloadCoverBtn" href="#" download hidden>下载封面</a>
+          <a class="button-link secondary" id="downloadXhsBtn" href="#" download hidden>下载小红书</a>
         </div>
         <p class="status" id="status"></p>
       </form>
@@ -452,6 +464,15 @@
             <div class="empty">生成后会显示横版封面。</div>
           </div>
         </aside>
+
+        <aside class="surface">
+          <div class="surface-header">
+            <h2 class="surface-title">小红书海报</h2>
+          </div>
+          <div class="surface-body" id="xhsPreview">
+            <div class="empty">点击“生成小红书”后会显示竖版海报。</div>
+          </div>
+        </aside>
       </div>
     </section>
   </main>
@@ -462,11 +483,14 @@
     const generateBtn = document.getElementById("generateBtn");
     const copyBtn = document.getElementById("copyBtn");
     const publishBtn = document.getElementById("publishBtn");
+    const xhsBtn = document.getElementById("xhsBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const downloadCoverBtn = document.getElementById("downloadCoverBtn");
+    const downloadXhsBtn = document.getElementById("downloadXhsBtn");
     const articlePreview = document.getElementById("articlePreview");
     const posterPreview = document.getElementById("posterPreview");
     const coverPreview = document.getElementById("coverPreview");
+    const xhsPreview = document.getElementById("xhsPreview");
     const cityInput = document.getElementById("city");
     const coverTitleInput = document.getElementById("cover_title");
     const playerTypeCountInput = document.getElementById("player_type_count");
@@ -606,6 +630,38 @@
         statusEl.className = "status error";
       } finally {
         generateBtn.disabled = false;
+      }
+    });
+
+    xhsBtn.addEventListener("click", async () => {
+      updatePlayerRequirement();
+      statusEl.textContent = "正在生成小红书海报...";
+      statusEl.className = "status";
+      xhsBtn.disabled = true;
+      downloadXhsBtn.hidden = true;
+
+      const data = new FormData(form);
+
+      try {
+        const response = await fetch("/recruitment/generate-xiaohongshu-poster", {
+          method: "POST",
+          body: data,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "小红书海报生成失败");
+        }
+
+        const imageUrl = `${result.xiaohongshu_image_url}?t=${Date.now()}`;
+        xhsPreview.innerHTML = `<img class="xhs-image" src="${imageUrl}" alt="小红书招募海报">`;
+        downloadXhsBtn.href = result.xiaohongshu_image_url;
+        downloadXhsBtn.hidden = false;
+        statusEl.textContent = "小红书海报生成成功。";
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        xhsBtn.disabled = false;
       }
     });
 
