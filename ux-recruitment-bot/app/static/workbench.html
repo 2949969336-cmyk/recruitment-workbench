@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>公众号招募工作台</title>
+  <style>
+    :root {
+      --green: #177a37;
+      --green-2: #31a24c;
+      --mint: #e8f5e9;
+      --line: #d6e8d7;
+      --text: #1d2b1f;
+      --muted: #66736a;
+      --paper: #ffffff;
+      --danger: #b42318;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: #edf7ef;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(420px, 560px) minmax(520px, 1fr);
+      min-height: 100vh;
+    }
+
+    .panel {
+      padding: 24px;
+      border-right: 1px solid var(--line);
+      background: var(--paper);
+      overflow: auto;
+    }
+
+    .preview {
+      padding: 24px;
+      overflow: auto;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      color: var(--green);
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section {
+      margin: 22px 0;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      color: var(--green);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #cfd8d2;
+      border-radius: 6px;
+      padding: 10px 11px;
+      color: var(--text);
+      background: #fff;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--green-2);
+      box-shadow: 0 0 0 3px rgba(49, 162, 76, 0.14);
+    }
+
+    .field { margin-bottom: 14px; }
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .check-row input {
+      width: auto;
+      margin: 0;
+    }
+
+    .type-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .type-item {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfefb;
+    }
+
+    .type-item-title {
+      margin: 0 0 10px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .actions {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      gap: 10px;
+      padding-top: 16px;
+      background: linear-gradient(rgba(255,255,255,0), #fff 28%);
+    }
+
+    button,
+    .button-link {
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .primary { color: #fff; background: var(--green-2); }
+    .secondary { color: var(--green); background: var(--mint); }
+    button:disabled { opacity: 0.65; cursor: wait; }
+
+    .result-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 500px) minmax(320px, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .surface {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: 0 12px 30px rgba(17, 74, 35, 0.08);
+      overflow: hidden;
+    }
+
+    .surface-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .surface-title {
+      margin: 0;
+      color: var(--green);
+      font-size: 16px;
+    }
+
+    .surface-body { padding: 16px; }
+
+    .article-title {
+      margin: 0 0 8px;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .digest {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .article {
+      max-height: 620px;
+      overflow: auto;
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .article h1 { font-size: 22px; }
+    .article h2 {
+      margin: 20px 0 8px;
+      color: var(--green);
+      font-size: 17px;
+    }
+
+    .poster {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--mint);
+    }
+
+    .cover-image {
+      display: block;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #5d12e8;
+    }
+
+    .empty {
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+      padding: 28px;
+    }
+
+    .status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .error { color: var(--danger); }
+
+    @media (max-width: 1100px) {
+      .app,
+      .result-layout {
+        grid-template-columns: 1fr;
+      }
+      .panel { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .panel,
+      .preview { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="panel">
+      <h1>公众号招募工作台</h1>
+      <p class="subtitle">填写活动信息，生成公众号文案和招募海报。</p>
+
+      <form id="recruitmentForm">
+        <div class="section">
+          <h2 class="section-title">基本信息</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="city">城市名称 *</label>
+              <input id="city" name="city" value="杭州" required>
+            </div>
+            <div class="field">
+              <label for="game_category">游戏品类/名称 *</label>
+              <input id="game_category" name="game_category" value="燕云十六声" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="activity_date">活动完整时间 *</label>
+            <textarea id="activity_date" name="activity_date" required>5月19日（周二）或 5月20日（周三），下午14:30-18:00</textarea>
+          </div>
+          <div class="field">
+            <label for="poster_date">海报展示日期</label>
+            <input id="poster_date" name="poster_date" value="5.19-5.20" placeholder="例如：5.19-5.20">
+            <div class="hint">用于海报顶部短标签，公众号正文仍使用完整时间。</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">玩家要求</h2>
+          <div class="field">
+            <label for="player_type_count">玩家类型数量 *</label>
+            <input id="player_type_count" type="number" min="1" max="6" value="1">
+            <div class="hint">每类会生成一个“类型：要求”，海报里类型名会自动加粗标绿。</div>
+          </div>
+          <div class="type-list" id="playerTypeList"></div>
+          <div class="field">
+            <label for="player_requirement_desc">合并后的玩家要求</label>
+            <textarea id="player_requirement_desc" name="player_requirement_desc" required readonly></textarea>
+            <div class="hint">这里会自动生成，也可以用于确认最终写入海报和公众号的内容。</div>
+          </div>
+          <div class="field">
+            <label for="game_examples">游戏举例 *</label>
+            <input id="game_examples" name="game_examples" value="燕云十六声" required>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">活动详情</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="duration">测试时长 *</label>
+              <textarea id="duration" name="duration" required>3.5H</textarea>
+            </div>
+            <div class="field">
+              <label for="reward_amount">礼金 *</label>
+              <textarea id="reward_amount" name="reward_amount" required>200元+50元交通补贴</textarea>
+            </div>
+          </div>
+          <div class="field">
+            <label for="location">活动地点 *</label>
+            <textarea id="location" name="location" required>杭州滨江网易大厦一期（网商路599号）</textarea>
+          </div>
+          <div class="field">
+            <label for="activity_description">活动内容 *</label>
+            <textarea id="activity_description" name="activity_description" required>体验部分新内容，并给出自己的看法和建议</textarea>
+          </div>
+          <div class="field">
+            <label for="project_id">项目编号 *</label>
+            <input id="project_id" name="project_id" value="20260526" required>
+          </div>
+          <div class="field">
+            <label for="extra_notes">补充说明</label>
+            <textarea id="extra_notes" name="extra_notes" placeholder="可选"></textarea>
+          </div>
+          <label class="check-row" for="use_llm">
+            <input id="use_llm" name="use_llm" type="checkbox" value="true">
+            使用 LLM 润色文案
+          </label>
+          <div class="hint">默认关闭，生成更快也更稳定；需要改写语气时再打开。</div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">封面海报</h2>
+          <label class="check-row" for="include_cover">
+            <input id="include_cover" name="include_cover" type="checkbox" value="true" checked>
+            同时生成横版封面海报
+          </label>
+          <div class="grid">
+            <div class="field">
+              <label for="cover_deadline">活动截止日期</label>
+              <input id="cover_deadline" name="cover_deadline" value="5月19日" placeholder="例如：5月19日">
+            </div>
+            <div class="field">
+              <label for="cover_title">封面标题</label>
+              <textarea id="cover_title" name="cover_title">招募杭州游戏玩家
+参与线下游戏体验</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">二维码</h2>
+          <div class="grid">
+            <div class="field">
+              <label for="signup_link">报名链接</label>
+              <input id="signup_link" name="signup_link" placeholder="粘贴报名问卷链接">
+              <div class="hint">填写链接后会自动生成二维码。</div>
+            </div>
+            <div class="field">
+              <label for="community_link">社群链接</label>
+              <input id="community_link" name="community_link" placeholder="粘贴社群链接">
+              <div class="hint">填写链接后会自动生成二维码。</div>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label for="signup_qr">报名二维码图片</label>
+              <input id="signup_qr" name="signup_qr" type="file" accept="image/png,image/jpeg,image/jpg">
+              <div class="hint">可选。上传图片时优先使用图片。</div>
+            </div>
+            <div class="field">
+              <label for="community_qr">社群二维码图片</label>
+              <input id="community_qr" name="community_qr" type="file" accept="image/png,image/jpeg,image/jpg">
+              <div class="hint">可选。上传图片时优先使用图片。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="generateBtn" type="submit">生成预览</button>
+          <button class="secondary" id="copyBtn" type="button" disabled>复制文案</button>
+          <button class="secondary" id="publishBtn" type="button" disabled>推送草稿箱</button>
+          <a class="button-link secondary" id="downloadBtn" href="#" download hidden>下载海报</a>
+          <a class="button-link secondary" id="downloadCoverBtn" href="#" download hidden>下载封面</a>
+        </div>
+        <p class="status" id="status"></p>
+      </form>
+    </section>
+
+    <section class="preview">
+      <div class="result-layout">
+        <article class="surface">
+          <div class="surface-header">
+            <h2 class="surface-title">公众号文案</h2>
+          </div>
+          <div class="surface-body" id="articlePreview">
+            <div class="empty">生成后会显示标题、摘要和正文。</div>
+          </div>
+        </article>
+
+        <aside class="surface">
+          <div class="surface-header">
+            <h2 class="surface-title">海报预览</h2>
+          </div>
+          <div class="surface-body" id="posterPreview">
+            <div class="empty">生成后会显示海报图片。</div>
+          </div>
+        </aside>
+
+        <aside class="surface">
+          <div class="surface-header">
+            <h2 class="surface-title">封面海报</h2>
+          </div>
+          <div class="surface-body" id="coverPreview">
+            <div class="empty">生成后会显示横版封面。</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("recruitmentForm");
+    const statusEl = document.getElementById("status");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const publishBtn = document.getElementById("publishBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const downloadCoverBtn = document.getElementById("downloadCoverBtn");
+    const articlePreview = document.getElementById("articlePreview");
+    const posterPreview = document.getElementById("posterPreview");
+    const coverPreview = document.getElementById("coverPreview");
+    const cityInput = document.getElementById("city");
+    const coverTitleInput = document.getElementById("cover_title");
+    const playerTypeCountInput = document.getElementById("player_type_count");
+    const playerTypeList = document.getElementById("playerTypeList");
+    const playerRequirementInput = document.getElementById("player_requirement_desc");
+    let latestContentHtml = "";
+    let latestPreview = null;
+
+    cityInput.addEventListener("input", () => {
+      if (!coverTitleInput.dataset.edited) {
+        coverTitleInput.value = `招募${cityInput.value || "城市"}游戏玩家\n参与线下游戏体验`;
+      }
+    });
+
+    coverTitleInput.addEventListener("input", () => {
+      coverTitleInput.dataset.edited = "true";
+    });
+
+    playerTypeCountInput.addEventListener("input", renderPlayerTypeInputs);
+
+    function renderPlayerTypeInputs() {
+      const count = Math.min(Math.max(Number(playerTypeCountInput.value) || 1, 1), 6);
+      const existing = Array.from(playerTypeList.querySelectorAll(".type-item")).map((item) => ({
+        name: item.querySelector(".player-type-name")?.value || "",
+        detail: item.querySelector(".player-type-detail")?.value || "",
+      }));
+
+      playerTypeList.innerHTML = "";
+      for (let index = 0; index < count; index += 1) {
+        const saved = existing[index] || defaultPlayerTypes[index] || { name: "", detail: "" };
+        const item = document.createElement("div");
+        item.className = "type-item";
+        item.innerHTML = `
+          <p class="type-item-title">玩家类型 ${index + 1}</p>
+          <div class="grid">
+            <div class="field">
+              <label>类型名称 *</label>
+              <input class="player-type-name" value="${escapeAttribute(saved.name)}" placeholder="例如：自走棋游戏玩家">
+            </div>
+            <div class="field">
+              <label>要求描述 *</label>
+              <textarea class="player-type-detail" placeholder="例如：金铲铲、多多自走棋等">${escapeHtml(saved.detail)}</textarea>
+            </div>
+          </div>
+        `;
+        item.querySelectorAll("input, textarea").forEach((input) => {
+          input.addEventListener("input", updatePlayerRequirement);
+        });
+        playerTypeList.appendChild(item);
+      }
+      updatePlayerRequirement();
+    }
+
+    function updatePlayerRequirement() {
+      const lines = Array.from(playerTypeList.querySelectorAll(".type-item"))
+        .map((item) => {
+          const name = item.querySelector(".player-type-name").value.trim();
+          const detail = item.querySelector(".player-type-detail").value.trim();
+          if (name && detail) return `${name}：${detail}`;
+          if (detail) return detail;
+          return "";
+        })
+        .filter(Boolean);
+      playerRequirementInput.value = lines.join("\n");
+    }
+
+    const defaultPlayerTypes = [
+      {
+        name: "燕云十六声玩家",
+        detail: "目前正在玩燕云且体验时间2个月以上（PC端/移动端均可）",
+      },
+      {
+        name: "其他类型玩家",
+        detail: "有其他品类体验经历",
+      },
+    ];
+
+    renderPlayerTypeInputs();
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      updatePlayerRequirement();
+      statusEl.textContent = "正在生成文案和海报...";
+      statusEl.className = "status";
+      generateBtn.disabled = true;
+      copyBtn.disabled = true;
+      publishBtn.disabled = true;
+      downloadBtn.hidden = true;
+      downloadCoverBtn.hidden = true;
+
+      const data = new FormData(form);
+      data.set("include_poster", "true");
+      data.set("include_cover", document.getElementById("include_cover").checked ? "true" : "false");
+      data.set("use_llm", document.getElementById("use_llm").checked ? "true" : "false");
+
+      try {
+        const response = await fetch("/recruitment/generate-preview", {
+          method: "POST",
+          body: data,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "生成失败");
+        }
+
+        latestContentHtml = result.content_html || "";
+        latestPreview = result;
+        articlePreview.innerHTML = `
+          <h3 class="article-title">${escapeHtml(result.title)}</h3>
+          <p class="digest">${escapeHtml(result.digest)}</p>
+          <div class="article">${result.content_html}</div>
+        `;
+
+        if (result.poster_image_url) {
+          const imageUrl = `${result.poster_image_url}?t=${Date.now()}`;
+          posterPreview.innerHTML = `<img class="poster" src="${imageUrl}" alt="招募海报">`;
+          downloadBtn.href = result.poster_image_url;
+          downloadBtn.hidden = false;
+        } else {
+          posterPreview.innerHTML = `<div class="empty">没有生成海报。</div>`;
+        }
+
+        if (result.cover_image_url) {
+          const coverUrl = `${result.cover_image_url}?t=${Date.now()}`;
+          coverPreview.innerHTML = `<img class="cover-image" src="${coverUrl}" alt="封面海报">`;
+          downloadCoverBtn.href = result.cover_image_url;
+          downloadCoverBtn.hidden = false;
+        } else {
+          coverPreview.innerHTML = `<div class="empty">没有生成封面。</div>`;
+        }
+
+        copyBtn.disabled = false;
+        publishBtn.disabled = false;
+        statusEl.textContent = "预览生成成功。";
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      if (!latestContentHtml) return;
+      await navigator.clipboard.writeText(latestContentHtml);
+      statusEl.textContent = "公众号正文 HTML 已复制。";
+      statusEl.className = "status";
+    });
+
+    publishBtn.addEventListener("click", async () => {
+      if (!latestPreview) return;
+      const coverPath = latestPreview.cover_image_path || latestPreview.poster_image_path;
+      if (!coverPath) {
+        statusEl.textContent = "请先生成封面或海报，再推送草稿箱。";
+        statusEl.className = "status error";
+        return;
+      }
+
+      publishBtn.disabled = true;
+      statusEl.textContent = "正在推送到公众号草稿箱...";
+      statusEl.className = "status";
+
+      try {
+        const payload = new FormData();
+        payload.set("title", latestPreview.title || "");
+        payload.set("digest", latestPreview.digest || "");
+        payload.set("content_html", latestPreview.content_html || "");
+        payload.set("cover_image_path", coverPath);
+        payload.set("poster_image_path", latestPreview.poster_image_path || coverPath);
+
+        const response = await fetch("/recruitment/publish-preview-draft", {
+          method: "POST",
+          body: payload,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "草稿推送失败");
+        }
+        statusEl.textContent = `草稿推送成功，draft_id：${result.draft_id || "已生成"}`;
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        publishBtn.disabled = false;
+      }
+    });
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("\n", " ");
+    }
+  </script>
+</body>
+</html>

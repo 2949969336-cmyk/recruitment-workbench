@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易游戏玩家招募海报生成器</title>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(46, 125, 50, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        @media (max-width: 1100px) { .main-container { grid-template-columns: 1fr; } }
+        
+        /* === 控制面板 === */
+        .control-panel {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 10px 40px rgba(46, 125, 50, 0.12);
+            border: 3px solid #2E7D32;
+            max-height: fit-content;
+        }
+        .control-panel h2 {
+            margin-bottom: 24px;
+            color: #2E7D32;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2E7D32;
+            margin: 24px 0 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(46, 125, 50, 0.15);
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2E7D32;
+            font-size: 13px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #2E7D32;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #FAFAFA;
+            transition: all 0.2s;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input[type="file"] {
+            padding: 10px;
+            background: rgba(46, 125, 50, 0.03);
+            border: 2px dashed #2E7D32;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        
+        .upload-preview {
+            margin-top: 12px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(46, 125, 50, 0.03);
+            border: 2px dashed #2E7D32;
+            border-radius: 8px;
+        }
+        .upload-preview img { max-width: 140px; max-height: 140px; border: 2px solid #2E7D32; border-radius: 8px; }
+        
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 24px;
+            border: 2px solid #2E7D32;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+            min-width: 100px;
+            transition: all 0.2s;
+            box-shadow: 3px 3px 0 rgba(46, 125, 50, 0.2);
+        }
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 rgba(46, 125, 50, 0.2);
+        }
+        .btn-primary { background: #4CAF50; color: #fff; }
+        .btn-secondary { background: #E0E0E0; color: #333; }
+        
+        /* === 海报容器 === */
+        .poster-container { background: transparent; }
+        .poster {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            padding: 24px 16px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(46, 125, 50, 0.15);
+            border: 3px solid #2E7D32;
+            position: relative;
+        }
+
+        /* === 顶部标题区 === */
+        .header-section {
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+            padding: 20px 0 16px;
+        }
+        .header-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 12px;
+        }
+        .header-tags {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .header-tag {
+            background: #E8F5E9;
+            color: #2E7D32;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #2E7D32;
+        }
+
+        /* === 内容模块 === */
+        .pixel-box {
+            background: #fff;
+            border: 2px solid #2E7D32;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            position: relative;
+            box-shadow: 2px 2px 0 rgba(46, 125, 50, 0.1);
+        }
+        .pixel-box.dashed {
+            border: 2px dashed #2E7D32;
+            background: #fff;
+        }
+        
+        /* 模块标题图标 */
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            background: #4CAF50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(46, 125, 50, 0.2);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+        .card-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.8;
+        }
+        
+        /* 玩家要求模块 */
+        .requirement-label {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 6px;
+        }
+        
+        /* 活动详情模块 */
+        .detail-row {
+            margin-bottom: 8px;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #333;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+        
+        /* 活动礼金模块 */
+        .reward-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FF6B00;
+            margin: 8px 0;
+        }
+        .reward-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        /* 二维码模块 */
+        .qr-container {
+            text-align: center;
+            padding: 16px 0;
+        }
+        .qr-wrapper {
+            width: 200px;
+            height: 200px;
+            background: #f5f5f5;
+            border: 2px dashed #2E7D32;
+            border-radius: 8px;
+            margin: 12px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .qr-placeholder {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+        .qr-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        
+        /* 活动进度查询模块 */
+        .progress-item {
+            padding: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .progress-item:last-child {
+            border-bottom: none;
+        }
+        .progress-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: top;
+        }
+        .project-code {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 16px;
+            color: #2E7D32;
+            font-weight: bold;
+        }
+        .progress-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+        
+        /* 注意事项模块 */
+        .notice-list {
+            list-style: none;
+        }
+        .notice-item {
+            padding: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .notice-item:last-child {
+            border-bottom: none;
+        }
+        .notice-highlight {
+            color: #FF6B00;
+            font-weight: 500;
+        }
+        
+        /* 底部版权 */
+        .footer-section {
+            text-align: center;
+            padding: 18px 16px;
+            color: #999;
+            font-size: 11px;
+            line-height: 1.7;
+            border-top: 2px solid #2E7D32;
+            margin-top: 12px;
+            background: rgba(255,255,255,0.5);
+        }
+        .footer-title {
+            font-weight: 700;
+            color: #2E7D32;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .hidden { display: none; }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 24px;
+            background: #fff;
+            border: 3px solid #2E7D32;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(46, 125, 50, 0.1);
+        }
+        .page-header h1 { color: #2E7D32; font-size: 22px; margin-bottom: 8px; }
+        .page-header p { color: #666; font-size: 14px; }
+        
+        /* 轻量装饰 - 模块边角 */
+        .corner-deco {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .corner-tl { top: -6px; left: -6px; }
+        .corner-tr { top: -6px; right: -6px; }
+        .corner-bl { bottom: -6px; left: -6px; }
+        .corner-br { bottom: -6px; right: -6px; }
+        
+        .corner-dot {
+            width: 2px;
+            height: 2px;
+            background: #81C784;
+            box-shadow: 8px 0 0 #81C784, 0 8px 0 #81C784, 8px 8px 0 #81C784;
+        }
+        .corner-line {
+            width: 12px;
+            height: 1px;
+            background: #81C784;
+        }
+        .corner-line.vertical {
+            transform: rotate(90deg);
+        }
+        
+        /* 背景装饰 */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        .bg-decoration .dot {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #2E7D32;
+        }
+        
+        /* 自定义装饰元素 */
+        .decoration {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+        .star-deco {
+            width: 15px;
+            height: 15px;
+            background-image: url('../picture/星星.png');
+            opacity: 0.7;
+        }
+        .parallelogram-deco {
+            width: 120px;
+            height: 80px;
+            background-image: url('../picture/平行四边形.png');
+            opacity: 0.25;
+        }
+        .ellipse-deco {
+            width: 150px;
+            height: 60px;
+            background-image: url('../picture/椭圆.png');
+            opacity: 0.2;
+        }
+        .player-deco {
+            width: 80px;
+            height: 80px;
+            background-image: url('../picture/玩家.png');
+            opacity: 0.9;
+        }
+        .gamepad-deco {
+            width: 20px;
+            height: 20px;
+            background-image: url('../picture/游戏机.png');
+            opacity: 0.9;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .giftbox-deco {
+            width: 20px;
+            height: 20px;
+            background-image: url('../picture/礼品盒.png');
+            opacity: 0.9;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .leaf1-deco {
+            width: 20px;
+            height: 20px;
+            background-image: url('../picture/叶子1.png');
+            opacity: 0.7;
+        }
+        .leaf2-deco {
+            width: 20px;
+            height: 20px;
+            background-image: url('../picture/叶子2.png');
+            opacity: 0.7;
+        }
+        
+        @media print {
+            body { background: none; padding: 0; }
+            body::before { display: none; }
+            .control-panel, .page-header { display: none; }
+            .main-container { display: block; }
+            .poster { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration">
+        <div class="dot" style="top: 10%; left: 5%;"></div>
+        <div class="dot" style="top: 20%; left: 15%;"></div>
+        <div class="dot" style="top: 30%; left: 80%;"></div>
+        <div class="dot" style="top: 70%; left: 10%;"></div>
+        <div class="dot" style="top: 80%; left: 90%;"></div>
+        <div class="dot" style="top: 40%; left: 60%;"></div>
+        <div class="dot" style="top: 60%; left: 30%;"></div>
+        <div class="dot" style="top: 90%; left: 50%;"></div>
+    </div>
+
+    <div class="page-header">
+        <h1>🎮 网易游戏玩家招募海报生成器</h1>
+        <p>填写信息 + 上传二维码，一键生成精美招募海报</p>
+    </div>
+
+    <div class="main-container">
+        <div class="control-panel">
+            <h2>📝 填写活动信息</h2>
+            
+            <div class="section-title">基本信息</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>城市名称 *</label>
+                    <input type="text" id="city" value="广州" placeholder="例如：广州">
+                </div>
+                <div class="form-group">
+                    <label>活动日期 *</label>
+                    <input type="text" id="eventDate" value="5.29-5.30" placeholder="例如：5.29-5.30">
+                </div>
+            </div>
+            
+            <div class="section-title">玩家要求</div>
+            <div class="form-group">
+                <label>目标玩家描述 *</label>
+                <textarea id="playerRequirement" placeholder="描述目标玩家的游戏类型、时长等要求">正在体验以下任意网易手游：
+率土之滨手游、三国杀手游</textarea>
+            </div>
+            
+            <div class="section-title">活动详情</div>
+            <div class="form-group">
+                <label>活动时间段 *</label>
+                <input type="text" id="activityTime" value="5 月 29 日至 6 月 30 日任意 1 天">
+            </div>
+            <div class="form-group">
+                <label>测试时长 *</label>
+                <input type="text" id="testDuration" value="10:00-13:00; 14:00-17:00，共 6H">
+            </div>
+            <div class="form-group">
+                <label>活动地点 *</label>
+                <input type="text" id="activityLocation" value="广州网易总部二期">
+            </div>
+            
+            <div class="section-title">活动内容</div>
+            <div class="form-group">
+                <label>活动任务描述 *</label>
+                <textarea id="activityContent" placeholder="描述玩家需要完成的任务">体验游戏并与工作人员谈谈你的感受</textarea>
+            </div>
+            
+            <div class="section-title">活动礼金</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>基础报酬 (元) *</label>
+                    <input type="number" id="baseReward" value="450">
+                </div>
+                <div class="form-group">
+                    <label>交通补贴 (元) *</label>
+                    <input type="number" id="transportSubsidy" value="50">
+                </div>
+            </div>
+            
+            <div class="section-title">报名链接</div>
+            <div class="form-group">
+                <label>报名提示文字</label>
+                <input type="text" id="signupHint" value="欢迎玩家们扫码报名~（报名问卷无礼金）">
+            </div>
+            <div class="form-group">
+                <label>📤 上传报名二维码图片 *</label>
+                <input type="file" id="signupQRFile" accept="image/png,image/jpeg,image/jpg" onchange="handleQRUpload('signup')">
+                <div class="upload-preview" id="signupPreview"><p style="color: #999; font-size: 12px;">预览将显示在这里</p></div>
+            </div>
+            
+            <div class="section-title">活动进度查询</div>
+            <div class="form-group">
+                <label>项目编号 *</label>
+                <input type="text" id="projectCode" value="20200422">
+            </div>
+            
+            <div class="section-title">玩家社群</div>
+            <div class="form-group">
+                <label>社群引流文字</label>
+                <textarea id="communityText" placeholder="社群引流描述">这个活动与您的游戏经历不匹配？
+没关系，我们还有更多有趣的活动信息在社群，欢迎扫码加入！！！（若二维码失效，可后台留言小编哦~）</textarea>
+            </div>
+            <div class="form-group">
+                <label>📤 上传社群二维码图片 *</label>
+                <input type="file" id="communityQRFile" accept="image/png,image/jpeg,image/jpg" onchange="handleQRUpload('community')">
+                <div class="upload-preview" id="communityPreview"><p style="color: #999; font-size: 12px;">预览将显示在这里</p></div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="generatePoster()">🎨 生成海报</button>
+                <button class="btn btn-secondary" onclick="downloadPNG()">📥 下载 PNG</button>
+                <button class="btn btn-secondary" onclick="printPoster()">🖨️ 打印</button>
+            </div>
+        </div>
+
+        <!-- 海报预览 -->
+        <div class="poster-container" id="posterContainer" style="position: relative;">
+            <!-- 背景装饰元素 -->
+            <div class="decoration parallelogram-deco" style="top: 100px; left: -60px;"></div>
+            <div class="decoration parallelogram-deco" style="bottom: 100px; right: -60px; transform: rotate(180deg);"></div>
+            <div class="decoration ellipse-deco" style="top: 300px; right: -75px;"></div>
+            <div class="decoration ellipse-deco" style="bottom: 300px; left: -75px; transform: rotate(180deg);"></div>
+            
+            <div class="poster" id="poster">
+                <!-- 顶部标题区 -->
+                <div class="header-section">
+                    <!-- 四角星星装饰 -->
+                    <div class="decoration star-deco" style="top: 0; left: 0;"></div>
+                    <div class="decoration star-deco" style="top: 0; right: 0;"></div>
+                    <div class="decoration star-deco" style="bottom: 0; left: 0;"></div>
+                    <div class="decoration star-deco" style="bottom: 0; right: 0;"></div>
+                    <!-- 玩家插画装饰 -->
+                    <div class="decoration player-deco" style="top: 10px; right: 20px;"></div>
+                    <div class="header-title" id="headerTitle">广州 招募游戏玩家</div>
+                    <div class="header-tags">
+                        <span class="header-tag" id="headerDate">5.29-5.30</span>
+                        <span class="header-tag" id="headerCity">广州</span>
+                    </div>
+                </div>
+
+                <!-- 模块 1: 玩家要求 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="gamepad-deco"></div>
+                        <div class="card-icon">要</div>
+                        <div class="card-title">玩家要求</div>
+                    </div>
+                    <div class="card-content" id="playerRequirementContent">
+                        <div class="requirement-label">正在体验以下任意网易手游：</div>
+                        <div>率土之滨手游、三国杀手游</div>
+                    </div>
+                </div>
+
+                <!-- 模块 2: 活动详情 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">详</div>
+                        <div class="card-title">活动详情</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-row">
+                            <div class="detail-label">【活动时间】<span id="activityTimeValue">5 月 29 日至 6 月 30 日任意 1 天</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">【测试时长】<span id="testDurationValue">10:00-13:00; 14:00-17:00，共 6H</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">【活动地点】<span id="activityLocationValue">广州网易总部二期</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模块 3: 活动内容 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">容</div>
+                        <div class="card-title">活动内容</div>
+                    </div>
+                    <div class="card-content" id="activityContentValue">
+                        体验游戏并与工作人员谈谈你的感受
+                    </div>
+                </div>
+
+                <!-- 模块 4: 活动礼金 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="giftbox-deco"></div>
+                        <div class="card-icon">金</div>
+                        <div class="card-title">活动礼金</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="reward-amount" id="rewardAmount">【活动报酬】450元+50元交通补贴</div>
+                        <div class="reward-note">现场签到即发放</div>
+                    </div>
+                </div>
+
+                <!-- 模块 5: 报名链接 -->
+                <div class="pixel-box dashed">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">码</div>
+                        <div class="card-title">报名链接</div>
+                    </div>
+                    <div class="card-content">
+                        <div id="signupHintValue" style="margin-bottom: 12px;">欢迎玩家们扫码报名~（报名问卷无礼金）</div>
+                        <div class="qr-container">
+                            <div class="qr-wrapper">
+                                <div class="qr-placeholder" id="signupPlaceholder">
+                                    请上传报名二维码<br>支持 PNG/JPG 格式
+                                </div>
+                                <img id="signupQRImage" class="qr-image hidden" src="" alt="报名二维码">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模块 6: 活动进度查询 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">询</div>
+                        <div class="card-title">活动进度查询</div>
+                    </div>
+                    <div class="card-content">
+                        <div style="font-size: 13px; color: #666; margin-bottom: 12px;">您可通过以下方式了解招募进度：</div>
+                        <div class="progress-item">
+                            <span class="progress-number">1</span>
+                            <strong>等待通知：</strong>提交报名信息后，可能会收到工作人员电话或短信提醒，活动入选以收到短信/电话为准；若活动开始前仍未收到短信或电话提醒，则默认未入选；按要求完成活动后，礼金通常会在 5-10 个工作日内转账至您收款账户内
+                        </div>
+                        <div class="progress-item">
+                            <span class="progress-number">2</span>
+                            <strong>自助查询：</strong>后台回复报名活动的相应编号，即可查询项目进度
+                        </div>
+                        <div class="project-code" id="projectCodeValue">20200422</div>
+                        <div class="progress-note">（注意：该查询方式仅信息较为滞后，仅提供给您查询进度信息，如活动通知结果等）</div>
+                    </div>
+                </div>
+
+                <!-- 模块 7: 注意事项 -->
+                <div class="pixel-box">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">意</div>
+                        <div class="card-title">注意事项</div>
+                    </div>
+                    <div class="card-content">
+                        <ul class="notice-list">
+                            <li class="notice-item">
+                                1. 游戏企业工作/市场研究行业/媒体/自媒体行业不可参与，敬请谅解~
+                            </li>
+                            <li class="notice-item">
+                                2. 若存在个人信息及游戏经历作假、顶替他人参与活动、入选后无故缺席者，该过程中您愿意接受不予配合，则会被永久拉黑且不支付礼金；游戏内测试/访谈活动若涉及保密内容，请您在入选后签署保密协议，<span class="notice-highlight">泄密者将追究法律责任</span>~
+                            </li>
+                            <li class="notice-item">
+                                3. 游戏公司支付玩家礼金有义务对税金进行税务代扣
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 模块 8: 玩家社群 -->
+                <div class="pixel-box dashed">
+                    <div class="corner-deco corner-tl corner-dot"></div>
+                    <div class="corner-deco corner-tr corner-dot"></div>
+                    <div class="corner-deco corner-bl corner-dot"></div>
+                    <div class="corner-deco corner-br corner-dot"></div>
+                    <div class="card-header">
+                        <div class="card-icon">群</div>
+                        <div class="card-title">玩家社群</div>
+                    </div>
+                    <div class="card-content">
+                        <div id="communityTextValue" style="margin-bottom: 12px; font-size: 13px;">
+                            这个活动与您的游戏经历不匹配？<br>
+                            没关系，我们还有更多有趣的活动信息在社群，欢迎扫码加入！！！（若二维码失效，可后台留言小编哦~）
+                        </div>
+                        <div class="qr-container">
+                            <div class="qr-wrapper">
+                                <div class="qr-placeholder" id="communityPlaceholder">
+                                    请上传社群二维码<br>支持 PNG/JPG 格式
+                                </div>
+                                <img id="communityQRImage" class="qr-image hidden" src="" alt="社群二维码">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部版权 -->
+                <div class="footer-section" style="position: relative;">
+                    <div class="decoration leaf1-deco" style="bottom: 10px; left: 10px;"></div>
+                    <div class="decoration leaf2-deco" style="bottom: 10px; right: 10px;"></div>
+                    <div class="footer-title">严禁随意转载</div>
+                    <div>若有转载建议或商务合作需求，请于后台联系工作人员，切勿直接搬运或者随意改动。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        let signupQRData = null;
+        let communityQRData = null;
+        
+        function handleQRUpload(type) {
+            const fileInput = document.getElementById(type + 'QRFile');
+            const preview = document.getElementById(type + 'Preview');
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                alert('请上传 PNG 或 JPG 格式的图片');
+                fileInput.value = '';
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('图片大小不能超过 5MB');
+                fileInput.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                if (type === 'signup') { signupQRData = base64Data; } else { communityQRData = base64Data; }
+                preview.innerHTML = '<img src="' + base64Data + '" alt="预览图片">';
+                updatePoster();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function initPoster() { updatePoster(); }
+        
+        function updatePoster() {
+            const city = document.getElementById('city').value || '广州';
+            const eventDate = document.getElementById('eventDate').value || '5.29-5.30';
+            
+            document.getElementById('headerTitle').textContent = city + ' 招募游戏玩家';
+            document.getElementById('headerDate').textContent = eventDate;
+            document.getElementById('headerCity').textContent = city;
+            document.getElementById('playerRequirementContent').innerHTML = getRequirementHTML();
+            document.getElementById('activityTimeValue').textContent = document.getElementById('activityTime').value;
+            document.getElementById('testDurationValue').textContent = document.getElementById('testDuration').value;
+            document.getElementById('activityLocationValue').textContent = document.getElementById('activityLocation').value;
+            document.getElementById('activityContentValue').textContent = document.getElementById('activityContent').value;
+            
+            const baseReward = document.getElementById('baseReward').value || '0';
+            const transportSubsidy = document.getElementById('transportSubsidy').value || '0';
+            document.getElementById('rewardAmount').textContent = `【活动报酬】${baseReward}元+${transportSubsidy}元交通补贴`;
+            
+            document.getElementById('signupHintValue').textContent = document.getElementById('signupHint').value;
+            
+            const signupPlaceholder = document.getElementById('signupPlaceholder');
+            const signupQRImage = document.getElementById('signupQRImage');
+            if (signupQRData) {
+                signupQRImage.src = signupQRData;
+                signupQRImage.classList.remove('hidden');
+                signupPlaceholder.classList.add('hidden');
+            } else {
+                signupQRImage.classList.add('hidden');
+                signupPlaceholder.classList.remove('hidden');
+            }
+            
+            document.getElementById('projectCodeValue').textContent = document.getElementById('projectCode').value;
+            document.getElementById('communityTextValue').innerHTML = document.getElementById('communityText').value.replace(/\n/g, '<br>');
+            
+            const communityPlaceholder = document.getElementById('communityPlaceholder');
+            const communityQRImage = document.getElementById('communityQRImage');
+            if (communityQRData) {
+                communityQRImage.src = communityQRData;
+                communityQRImage.classList.remove('hidden');
+                communityPlaceholder.classList.add('hidden');
+            } else {
+                communityQRImage.classList.add('hidden');
+                communityPlaceholder.classList.remove('hidden');
+            }
+        }
+        
+        function getRequirementHTML() {
+            const playerRequirement = document.getElementById('playerRequirement').value;
+            const lines = playerRequirement.split('\n').filter(l => l.trim());
+            if (lines.length === 0) return '';
+            if (lines.length === 1) return '<div class="requirement-label">' + lines[0] + '</div>';
+            return '<div class="requirement-label">' + lines[0] + '</div><div>' + lines.slice(1).join('<br>') + '</div>';
+        }
+        
+        function generatePoster() {
+            updatePoster();
+            document.getElementById('posterContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function downloadPNG() {
+            updatePoster();
+            const poster = document.getElementById('poster');
+            
+            // 克隆海报节点并彻底移除所有装饰元素，避免本地图片路径污染画布
+            const clone = poster.cloneNode(true);
+            clone.querySelectorAll('.decoration').forEach(el => el.remove());
+            
+            // 将克隆节点放到视口外以确保正确渲染
+            clone.style.position = 'absolute';
+            clone.style.left = '-9999px';
+            clone.style.top = '-9999px';
+            clone.style.width = poster.offsetWidth + 'px';
+            document.body.appendChild(clone);
+            
+            html2canvas(clone, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#FFFFFF',
+                width: clone.offsetWidth,
+                height: clone.offsetHeight
+            }).then(canvas => {
+                document.body.removeChild(clone);
+                
+                const link = document.createElement('a');
+                link.download = '玩家招募海报-' + document.getElementById('city').value + '-' + new Date().toISOString().slice(0,10) + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                if (clone.parentNode) document.body.removeChild(clone);
+                console.error('PNG 下载失败:', err);
+                alert('PNG 下载失败: ' + err.message);
+            });
+        }
+        
+        function printPoster() {
+            updatePoster();
+            window.print();
+        }
+        
+        document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
+            input.addEventListener('input', updatePoster);
+        });
+        
+        window.addEventListener('load', initPoster);
+    </script>
+</body>
+</html>

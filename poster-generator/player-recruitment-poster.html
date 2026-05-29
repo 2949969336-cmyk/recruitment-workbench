@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玩家招募海报生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .poster-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .poster {
+            padding: 16px;
+        }
+
+        /* 顶部标题栏 */
+        .header-section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 16px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 12px;
+        }
+
+        .header-tags {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header-tag {
+            background: #E8F5E9;
+            color: #2E7D32;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 通用卡片样式 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-title-icon {
+            width: 28px;
+            height: 28px;
+            background: #4CAF50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .card-title-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .card-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 玩家要求模块 */
+        .requirement-label {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 6px;
+        }
+
+        /* 活动详情模块 */
+        .detail-row {
+            margin-bottom: 8px;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* 活动礼金模块 */
+        .reward-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF6B00;
+            margin: 8px 0;
+        }
+
+        .reward-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* 二维码模块 */
+        .qr-container {
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .qr-wrapper {
+            width: 200px;
+            height: 200px;
+            background: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            margin: 12px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .qr-placeholder {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .qr-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 活动进度查询模块 */
+        .progress-item {
+            padding: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .progress-item:last-child {
+            border-bottom: none;
+        }
+
+        .progress-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: top;
+        }
+
+        .project-code {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 16px;
+            color: #2E7D32;
+            font-weight: bold;
+        }
+
+        .progress-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        /* 注意事项模块 */
+        .notice-list {
+            list-style: none;
+        }
+
+        .notice-item {
+            padding: 10px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .notice-item:last-child {
+            border-bottom: none;
+        }
+
+        .notice-highlight {
+            color: #FF6B00;
+            font-weight: 500;
+        }
+
+        /* 底部版权声明 */
+        .footer-section {
+            text-align: center;
+            padding: 20px 16px;
+            color: #999;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .footer-title {
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .control-panel h2 {
+            margin-bottom: 20px;
+            color: #2E7D32;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input[type="file"] {
+            margin-top: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #388E3C;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2E7D32;
+            margin: 24px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #E8F5E9;
+        }
+
+        .upload-preview {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .upload-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .control-panel {
+                display: none;
+            }
+            .poster-container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 控制面板 -->
+    <div class="control-panel">
+        <h2>🎮 玩家招募海报生成器</h2>
+        <p style="color: #666; margin-bottom: 20px;">填写以下信息生成专属招募海报</p>
+
+        <div class="section-title">基本信息</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>城市名称 *</label>
+                <input type="text" id="city" value="广州" placeholder="例如：广州">
+            </div>
+            <div class="form-group">
+                <label>活动日期 *</label>
+                <input type="text" id="eventDate" value="5.29-5.30" placeholder="例如：5.29-5.30">
+            </div>
+        </div>
+
+        <div class="section-title">玩家要求</div>
+        <div class="form-group">
+            <label>目标玩家描述 *</label>
+            <textarea id="playerRequirement" placeholder="描述目标玩家的游戏类型、时长等要求">正在体验以下任意网易手游：
+率土之滨手游、三国杀手游</textarea>
+        </div>
+
+        <div class="section-title">活动详情</div>
+        <div class="form-group">
+            <label>活动时间段 *</label>
+            <input type="text" id="activityTime" value="5 月 29 日至 6 月 30 日任意 1 天" placeholder="例如：5 月 29 日至 6 月 30 日任意 1 天">
+        </div>
+        <div class="form-group">
+            <label>测试时长 *</label>
+            <input type="text" id="testDuration" value="10:00-13:00; 14:00-17:00，共 6H" placeholder="例如：10:00-13:00; 14:00-17:00，共 6H">
+        </div>
+        <div class="form-group">
+            <label>活动地点 *</label>
+            <input type="text" id="activityLocation" value="广州网易总部二期" placeholder="例如：广州网易总部二期">
+        </div>
+
+        <div class="section-title">活动内容</div>
+        <div class="form-group">
+            <label>活动任务描述 *</label>
+            <textarea id="activityContent" placeholder="描述玩家需要完成的任务">体验游戏并与工作人员谈谈你的感受</textarea>
+        </div>
+
+        <div class="section-title">活动礼金</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>基础报酬 (元) *</label>
+                <input type="number" id="baseReward" value="450" placeholder="例如：450">
+            </div>
+            <div class="form-group">
+                <label>交通补贴 (元) *</label>
+                <input type="number" id="transportSubsidy" value="50" placeholder="例如：50">
+            </div>
+        </div>
+
+        <div class="section-title">报名链接</div>
+        <div class="form-group">
+            <label>报名提示文字</label>
+            <input type="text" id="signupHint" value="欢迎玩家们扫码报名~（报名问卷无礼金）">
+        </div>
+        <div class="form-group">
+            <label>📤 上传报名二维码图片 *</label>
+            <input type="file" id="signupQRFile" accept="image/png,image/jpeg,image/jpg" onchange="handleQRUpload('signup')">
+            <div class="upload-preview" id="signupPreview">
+                <p style="color: #999; font-size: 13px;">预览将显示在这里</p>
+            </div>
+        </div>
+
+        <div class="section-title">活动进度查询</div>
+        <div class="form-group">
+            <label>项目编号 *</label>
+            <input type="text" id="projectCode" value="20200422" placeholder="例如：20200422">
+        </div>
+
+        <div class="section-title">玩家社群</div>
+        <div class="form-group">
+            <label>社群引流文字</label>
+            <textarea id="communityText" placeholder="社群引流描述">这个活动与您的游戏经历不匹配？
+没关系，我们还有更多有趣的活动信息在社群，欢迎扫码加入！！！（若二维码失效，可后台留言小编哦~）</textarea>
+        </div>
+        <div class="form-group">
+            <label>📤 上传社群二维码图片 *</label>
+            <input type="file" id="communityQRFile" accept="image/png,image/jpeg,image/jpg" onchange="handleQRUpload('community')">
+            <div class="upload-preview" id="communityPreview">
+                <p style="color: #999; font-size: 13px;">预览将显示在这里</p>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="generatePoster()">🎨 生成海报</button>
+            <button class="btn btn-secondary" onclick="downloadPNG()">📥 下载 PNG</button>
+            <button class="btn btn-secondary" onclick="printPoster()">🖨️ 打印/另存为</button>
+        </div>
+    </div>
+
+    <!-- 海报主体 -->
+    <div class="poster-container" id="posterContainer">
+        <div class="poster" id="poster">
+            <!-- 顶部标题栏 -->
+            <div class="header-section">
+                <div class="header-title" id="headerTitle">广州 招募游戏玩家</div>
+                <div class="header-tags">
+                    <span class="header-tag" id="headerDate">5.29-5.30</span>
+                    <span class="header-tag" id="headerCity">广州</span>
+                </div>
+            </div>
+
+            <!-- 玩家要求模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">要</div>
+                    <div class="card-title-text">玩家要求</div>
+                </div>
+                <div class="card-content" id="playerRequirementContent">
+                    <div class="requirement-label">正在体验以下任意网易手游：</div>
+                    <div>率土之滨手游、三国杀手游</div>
+                </div>
+            </div>
+
+            <!-- 活动详情模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">详</div>
+                    <div class="card-title-text">活动详情</div>
+                </div>
+                <div class="card-content">
+                    <div class="detail-row">
+                        <div class="detail-label">【活动时间】<span id="activityTimeValue">5 月 29 日至 6 月 30 日任意 1 天</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">【测试时长】<span id="testDurationValue">10:00-13:00; 14:00-17:00，共 6H</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">【活动地点】<span id="activityLocationValue">广州网易总部二期</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活动内容模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">容</div>
+                    <div class="card-title-text">活动内容</div>
+                </div>
+                <div class="card-content" id="activityContentValue">
+                    体验游戏并与工作人员谈谈你的感受
+                </div>
+            </div>
+
+            <!-- 活动礼金模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">金</div>
+                    <div class="card-title-text">活动礼金</div>
+                </div>
+                <div class="card-content">
+                    <div class="reward-amount" id="rewardAmount">【活动报酬】450 元+50 元交通补贴</div>
+                    <div class="reward-note">现场签到即发放</div>
+                </div>
+            </div>
+
+            <!-- 报名链接模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">码</div>
+                    <div class="card-title-text">报名链接</div>
+                </div>
+                <div class="card-content">
+                    <div id="signupHintValue" style="margin-bottom: 12px;">欢迎玩家们扫码报名~（报名问卷无礼金）</div>
+                    <div class="qr-container">
+                        <div class="qr-wrapper">
+                            <div class="qr-placeholder" id="signupPlaceholder">
+                                请上传报名二维码<br>支持 PNG/JPG 格式
+                            </div>
+                            <img id="signupQRImage" class="qr-image hidden" src="" alt="报名二维码">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活动进度查询模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">询</div>
+                    <div class="card-title-text">活动进度查询</div>
+                </div>
+                <div class="card-content">
+                    <div style="font-size: 13px; color: #666; margin-bottom: 12px;">您可通过以下方式了解招募进度：</div>
+                    <div class="progress-item">
+                        <span class="progress-number">1</span>
+                        <strong>等待通知：</strong>提交报名信息后，可能会收到工作人员电话或短信提醒，活动入选以收到短信/电话为准；若活动开始前仍未收到短信或电话提醒，则默认未入选；按要求完成活动后，礼金通常会在 5-10 个工作日内转账至您收款账户内
+                    </div>
+                    <div class="progress-item">
+                        <span class="progress-number">2</span>
+                        <strong>自助查询：</strong>后台回复报名活动的相应编号，即可查询项目进度
+                    </div>
+                    <div class="project-code" id="projectCodeValue">20200422</div>
+                    <div class="progress-note">（注意：该查询方式仅信息较为滞后，仅提供给您查询进度信息，如活动通知结果等）</div>
+                </div>
+            </div>
+
+            <!-- 注意事项模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">意</div>
+                    <div class="card-title-text">注意事项</div>
+                </div>
+                <div class="card-content">
+                    <ul class="notice-list">
+                        <li class="notice-item">
+                            1. 游戏企业工作/市场研究行业/媒体/自媒体行业不可参与，敬请谅解~
+                        </li>
+                        <li class="notice-item">
+                            2. 若存在个人信息及游戏经历作假、顶替他人参与活动、入选后无故缺席者，该过程中您愿意接受不予配合，则会被永久拉黑且不支付礼金；游戏内测试/访谈活动若涉及保密内容，请您在入选后签署保密协议，<span class="notice-highlight">泄密者将追究法律责任</span>~
+                        </li>
+                        <li class="notice-item">
+                            3. 游戏公司支付玩家礼金有义务对税金进行税务代扣
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 玩家社群模块 -->
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-icon">群</div>
+                    <div class="card-title-text">玩家社群</div>
+                </div>
+                <div class="card-content">
+                    <div id="communityTextValue" style="margin-bottom: 12px; font-size: 13px;">
+                        这个活动与您的游戏经历不匹配？<br>
+                        没关系，我们还有更多有趣的活动信息在社群，欢迎扫码加入！！！（若二维码失效，可后台留言小编哦~）
+                    </div>
+                    <div class="qr-container">
+                        <div class="qr-wrapper">
+                            <div class="qr-placeholder" id="communityPlaceholder">
+                                请上传社群二维码<br>支持 PNG/JPG 格式
+                            </div>
+                            <img id="communityQRImage" class="qr-image hidden" src="" alt="社群二维码">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部版权声明 -->
+            <div class="footer-section">
+                <div class="footer-title">严禁随意转载</div>
+                <div>若有转载建议或商务合作需求，请于后台联系工作人员，切勿直接搬运或者随意改动。</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        // 存储 Base64 图片数据
+        let signupQRData = null;
+        let communityQRData = null;
+
+        // 处理二维码上传
+        function handleQRUpload(type) {
+            const fileInput = document.getElementById(type + 'QRFile');
+            const preview = document.getElementById(type + 'Preview');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            // 验证文件类型
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                alert('请上传 PNG 或 JPG 格式的图片');
+                fileInput.value = '';
+                return;
+            }
+
+            // 验证文件大小（最大 5MB）
+            if (file.size > 5 * 1024 * 1024) {
+                alert('图片大小不能超过 5MB');
+                fileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                
+                // 存储数据
+                if (type === 'signup') {
+                    signupQRData = base64Data;
+                } else {
+                    communityQRData = base64Data;
+                }
+
+                // 显示预览
+                preview.innerHTML = `<img src="${base64Data}" alt="预览图片">`;
+
+                // 实时更新海报
+                updatePoster();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 初始化海报
+        function initPoster() {
+            updatePoster();
+        }
+
+        // 更新海报内容
+        function updatePoster() {
+            // 基本信息
+            const city = document.getElementById('city').value || '广州';
+            const eventDate = document.getElementById('eventDate').value || '5.29-5.30';
+            
+            document.getElementById('headerTitle').textContent = `${city} 招募游戏玩家`;
+            document.getElementById('headerDate').textContent = eventDate;
+            document.getElementById('headerCity').textContent = city;
+
+            // 玩家要求
+            const playerRequirement = document.getElementById('playerRequirement').value;
+            const requirementLines = playerRequirement.split('\n').filter(line => line.trim());
+            let requirementHTML = '';
+            if (requirementLines.length > 0) {
+                if (requirementLines.length === 1) {
+                    requirementHTML = `<div class="requirement-label">${requirementLines[0]}</div>`;
+                } else {
+                    requirementHTML = `<div class="requirement-label">${requirementLines[0]}</div><div>${requirementLines.slice(1).join('<br>')}</div>`;
+                }
+            }
+            document.getElementById('playerRequirementContent').innerHTML = requirementHTML;
+
+            // 活动详情
+            document.getElementById('activityTimeValue').textContent = document.getElementById('activityTime').value;
+            document.getElementById('testDurationValue').textContent = document.getElementById('testDuration').value;
+            document.getElementById('activityLocationValue').textContent = document.getElementById('activityLocation').value;
+
+            // 活动内容
+            document.getElementById('activityContentValue').textContent = document.getElementById('activityContent').value;
+
+            // 活动礼金
+            const baseReward = document.getElementById('baseReward').value || '0';
+            const transportSubsidy = document.getElementById('transportSubsidy').value || '0';
+            document.getElementById('rewardAmount').textContent = `【活动报酬】${baseReward}元+${transportSubsidy}元交通补贴`;
+
+            // 报名链接
+            document.getElementById('signupHintValue').textContent = document.getElementById('signupHint').value;
+            
+            // 处理报名二维码
+            const signupPlaceholder = document.getElementById('signupPlaceholder');
+            const signupQRImage = document.getElementById('signupQRImage');
+            if (signupQRData) {
+                signupQRImage.src = signupQRData;
+                signupQRImage.classList.remove('hidden');
+                signupPlaceholder.classList.add('hidden');
+            } else {
+                signupQRImage.classList.add('hidden');
+                signupPlaceholder.classList.remove('hidden');
+            }
+
+            // 项目编号
+            document.getElementById('projectCodeValue').textContent = document.getElementById('projectCode').value;
+
+            // 玩家社群
+            document.getElementById('communityTextValue').innerHTML = document.getElementById('communityText').value.replace(/\n/g, '<br>');
+            
+            // 处理社群二维码
+            const communityPlaceholder = document.getElementById('communityPlaceholder');
+            const communityQRImage = document.getElementById('communityQRImage');
+            if (communityQRData) {
+                communityQRImage.src = communityQRData;
+                communityQRImage.classList.remove('hidden');
+                communityPlaceholder.classList.add('hidden');
+            } else {
+                communityQRImage.classList.add('hidden');
+                communityPlaceholder.classList.remove('hidden');
+            }
+        }
+
+        // 生成海报
+        function generatePoster() {
+            updatePoster();
+            // 滚动到海报位置
+            document.getElementById('posterContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // 下载 PNG
+        function downloadPNG() {
+            updatePoster();
+            const poster = document.getElementById('poster');
+            
+            html2canvas(poster, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#E8F5E9',
+                width: poster.offsetWidth,
+                height: poster.offsetHeight
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `玩家招募海报-${document.getElementById('city').value}-${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // 打印/另存为
+        function printPoster() {
+            updatePoster();
+            window.print();
+        }
+
+        // 实时监听输入变化
+        document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
+            input.addEventListener('input', updatePoster);
+        });
+
+        // 页面加载时初始化
+        window.addEventListener('load', initPoster);
+    </script>
+</body>
+</html>

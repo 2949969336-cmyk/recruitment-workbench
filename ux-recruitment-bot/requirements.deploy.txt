@@ -1,0 +1,9 @@
+fastapi>=0.136.0
+uvicorn[standard]>=0.46.0
+httpx>=0.28.0
+openai>=1.30.0
+pydantic-settings>=2.14.0
+python-dotenv>=1.2.0
+python-multipart>=0.0.28
+playwright>=1.56.0
+qrcode[pil]>=8.0

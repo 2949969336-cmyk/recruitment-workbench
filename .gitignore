@@ -1,0 +1,32 @@
+# Secrets and local config
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+ENV/
+
+# Generated outputs
+ux-recruitment-bot/app/static/generated/
+*.log
+
+# Local backup archives
+备份/
+*.zip
+
+# Temporary/editor files
+.cowork-temp/
+poster-generator/repo/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Playwright/browser caches
+ms-playwright/
+playwright-report/
+test-results/
