@@ -29,8 +29,8 @@ class XiaohongshuService:
             async with async_playwright() as p:
                 browser = await p.chromium.launch()
                 context = await browser.new_context(
-                    viewport={"width": 800, "height": 1365},
-                    device_scale_factor=2,
+                    viewport={"width": 1080, "height": 1920},
+                    device_scale_factor=1,
                 )
                 page = await context.new_page()
                 await page.set_content(page_html, wait_until="load")
@@ -68,14 +68,23 @@ class XiaohongshuService:
     }}
     .xhs-poster {{
       position: relative;
-      width: 800px;
-      min-height: 1365px;
+      width: 1080px;
+      height: 1920px;
       overflow: hidden;
       color: #140f0d;
       background:
         radial-gradient(circle at 96% 2%, rgba(255, 232, 134, 0.8), transparent 34%),
         linear-gradient(135deg, #f7f6f0 0%, #fff7dd 58%, #ffe184 100%);
+    }}
+    .xhs-content {{
+      position: relative;
+      left: 120px;
+      top: 34px;
+      width: 800px;
+      min-height: 1365px;
       padding: 28px 38px 26px;
+      transform: scale(1.05);
+      transform-origin: left top;
     }}
     .pixel-spark {{
       position: absolute;
@@ -124,11 +133,11 @@ class XiaohongshuService:
       position: relative;
       z-index: 1;
       font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-      font-size: 86px;
-      line-height: 0.96;
-      font-weight: 900;
+      font-size: 66px;
+      line-height: 1;
+      font-weight: 750;
       letter-spacing: 0;
-      text-shadow: 3px 0 #000;
+      text-shadow: none;
     }}
     .subtitle {{
       position: relative;
@@ -234,30 +243,32 @@ class XiaohongshuService:
 </head>
 <body>
   <div class="xhs-poster">
-    <div class="pixel-spark"></div>
-    <div class="burst"><span>PLAY</span></div>
-    <div class="hero">
-      <div class="title">{city}玩家招募</div>
-      <div class="subtitle">{city}-GameRecruitment</div>
+    <div class="xhs-content">
+      <div class="pixel-spark"></div>
+      <div class="burst"><span>PLAY</span></div>
+      <div class="hero">
+        <div class="title">{city}玩家招募</div>
+        <div class="subtitle">{city}-GameRecruitment</div>
+      </div>
+
+      <section class="card">
+        <p class="block"><span class="label">【玩家要求】</span> 我们希望您是 {requirement}</p>
+        <p class="block"><span class="label">【活动内容】</span><br>{activity}</p>
+      </section>
+
+      <section class="card small">
+        <div class="sticker">游戏世界任你闯荡</div>
+        <p class="block"><span class="label">【活动时间】</span><br>{date}</p>
+        <p class="block"><span class="label">【测试时长】</span><br>{duration}</p>
+        <p class="block"><span class="label">【活动地点】</span><br>{location}</p>
+        <p class="block"><span class="label">【活动礼金】</span><br>{reward}</p>
+        <p class="block"><span class="label">【报名方式】</span><br>私聊报名</p>
+        <div class="eyes"><div class="eye"></div><div class="eye"></div><div class="eye"></div></div>
+      </section>
+
+      <div class="right-text">GAME TESTING RECRUITMENT</div>
+      <div class="footer">GAME TESTING RECRUITMENT</div>
     </div>
-
-    <section class="card">
-      <p class="block"><span class="label">【玩家要求】</span> 我们希望您是 {requirement}</p>
-      <p class="block"><span class="label">【活动内容】</span><br>{activity}</p>
-    </section>
-
-    <section class="card small">
-      <div class="sticker">游戏世界任你闯荡</div>
-      <p class="block"><span class="label">【活动时间】</span><br>{date}</p>
-      <p class="block"><span class="label">【测试时长】</span><br>{duration}</p>
-      <p class="block"><span class="label">【活动地点】</span><br>{location}</p>
-      <p class="block"><span class="label">【活动礼金】</span><br>{reward}</p>
-      <p class="block"><span class="label">【报名方式】</span><br>私聊报名</p>
-      <div class="eyes"><div class="eye"></div><div class="eye"></div><div class="eye"></div></div>
-    </section>
-
-    <div class="right-text">GAME TESTING RECRUITMENT</div>
-    <div class="footer">GAME TESTING RECRUITMENT</div>
   </div>
 </body>
 </html>"""
