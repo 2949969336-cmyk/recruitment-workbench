@@ -7,7 +7,8 @@ Write-Host "正在启动公众号招募工作台..." -ForegroundColor Green
 Write-Host "项目目录：$PSScriptRoot"
 Write-Host ""
 
-$setupMarker = ".\.setup-ok"
+$venvActivate = Join-Path $PSScriptRoot ".venv\Scripts\Activate.ps1"
+$setupMarker = Join-Path $PSScriptRoot ".setup-ok"
 $url = "http://127.0.0.1:8000/workbench"
 
 $existingServer = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
@@ -20,17 +21,17 @@ if ($existingServer) {
     exit 0
 }
 
-if (-not (Test-Path ".\.venv\Scripts\Activate.ps1")) {
+if (-not (Test-Path -LiteralPath $venvActivate)) {
     Write-Host "首次运行：正在创建 Python 虚拟环境..."
     python -m venv .venv
-    if (Test-Path $setupMarker) {
-        Remove-Item $setupMarker -Force
+    if (Test-Path -LiteralPath $setupMarker) {
+        Remove-Item -LiteralPath $setupMarker -Force
     }
 }
 
-.\.venv\Scripts\Activate.ps1
+. $venvActivate
 
-if (-not (Test-Path $setupMarker)) {
+if (-not (Test-Path -LiteralPath $setupMarker)) {
     Write-Host "首次运行：正在安装依赖和 Chromium，可能需要几分钟..."
     python -m pip install --upgrade pip
     pip install -r requirements.deploy.txt
