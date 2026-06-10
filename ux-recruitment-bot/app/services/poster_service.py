@@ -121,26 +121,23 @@ class PosterService:
                                 .detail-row {
                                     margin-bottom: 8px;
                                 }
-                                .detail-grid {
-                                    display: grid;
-                                    grid-template-columns: max-content minmax(0, 1fr);
-                                    column-gap: 4px;
-                                    align-items: start;
-                                }
-                                .detail-key {
-                                    color: #666;
-                                    font-size: 14px;
-                                    font-weight: 600;
-                                    white-space: nowrap;
-                                    line-height: 1.55;
-                                }
-                                .detail-grid .detail-value {
+                                .detail-hanging {
                                     color: #333;
                                     font-size: 14px;
                                     line-height: 1.55;
-                                    min-width: 0;
+                                    padding-left: 6.1em;
+                                    text-indent: -6.1em;
                                     word-break: keep-all;
                                     overflow-wrap: break-word;
+                                }
+                                .detail-hanging .detail-key {
+                                    color: #666;
+                                    font-weight: 600;
+                                    white-space: nowrap;
+                                }
+                                .detail-hanging .manual-break {
+                                    display: block;
+                                    margin-left: 0;
                                 }
                             `;
                             document.head.appendChild(style);
@@ -176,9 +173,8 @@ class PosterService:
                                 return;
                             }
                             row.innerHTML = `
-                                <div class="detail-grid">
-                                    <span class="detail-key">${label}</span>
-                                    <span class="detail-value" id="${id}">${toLines(value)}</span>
+                                <div class="detail-hanging">
+                                    <span class="detail-key">${label}</span><span id="${id}">${escapeHtml(value).replaceAll("\\n", '<br><span class="manual-break"></span>')}</span>
                                 </div>
                             `;
                         };
