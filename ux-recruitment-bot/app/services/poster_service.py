@@ -121,23 +121,26 @@ class PosterService:
                                 .detail-row {
                                     margin-bottom: 8px;
                                 }
-                                .detail-hanging {
+                                .detail-line {
+                                    display: grid !important;
+                                    grid-template-columns: 86px minmax(0, 1fr) !important;
+                                    align-items: start;
+                                    column-gap: 0;
                                     color: #333;
                                     font-size: 14px;
                                     line-height: 1.55;
-                                    padding-left: 6.1em;
-                                    text-indent: -6.1em;
-                                    word-break: keep-all;
-                                    overflow-wrap: break-word;
                                 }
-                                .detail-hanging .detail-key {
+                                .detail-line .detail-key,
+                                .detail-line .detail-label {
                                     color: #666;
                                     font-weight: 600;
                                     white-space: nowrap;
                                 }
-                                .detail-hanging .manual-break {
-                                    display: block;
-                                    margin-left: 0;
+                                .detail-line .detail-value {
+                                    color: #333;
+                                    min-width: 0;
+                                    word-break: keep-all;
+                                    overflow-wrap: break-word;
                                 }
                             `;
                             document.head.appendChild(style);
@@ -173,8 +176,9 @@ class PosterService:
                                 return;
                             }
                             row.innerHTML = `
-                                <div class="detail-hanging">
-                                    <span class="detail-key">${label}</span><span id="${id}">${escapeHtml(value).replaceAll("\\n", '<br><span class="manual-break"></span>')}</span>
+                                <div class="detail-line">
+                                    <span class="detail-key">${label}</span>
+                                    <span class="detail-value" id="${id}">${toLines(value)}</span>
                                 </div>
                             `;
                         };
