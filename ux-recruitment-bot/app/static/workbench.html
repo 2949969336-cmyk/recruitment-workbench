@@ -427,9 +427,12 @@
           <button class="primary" id="generateBtn" type="submit">生成预览</button>
           <button class="secondary" id="copyBtn" type="button" disabled>复制文案</button>
           <button class="secondary" id="publishBtn" type="button" disabled>推送草稿箱</button>
+          <button class="secondary" id="publicBtn" type="button">生成脱敏公众号</button>
+          <button class="secondary" id="publishPublicBtn" type="button" disabled>推送脱敏草稿</button>
           <button class="secondary" id="xhsBtn" type="button">生成小红书</button>
           <a class="button-link secondary" id="downloadBtn" href="#" download hidden>下载海报</a>
           <a class="button-link secondary" id="downloadCoverBtn" href="#" download hidden>下载封面</a>
+          <a class="button-link secondary" id="downloadPublicBtn" href="#" download hidden>下载脱敏海报</a>
           <a class="button-link secondary" id="downloadXhsBtn" href="#" download hidden>下载小红书</a>
         </div>
         <p class="status" id="status"></p>
@@ -467,6 +470,15 @@
 
         <aside class="surface">
           <div class="surface-header">
+            <h2 class="surface-title">脱敏公众号海报</h2>
+          </div>
+          <div class="surface-body" id="publicPreview">
+            <div class="empty">点击“生成脱敏公众号”后会显示新版脱敏长海报。</div>
+          </div>
+        </aside>
+
+        <aside class="surface">
+          <div class="surface-header">
             <h2 class="surface-title">小红书海报</h2>
           </div>
           <div class="surface-body" id="xhsPreview">
@@ -483,13 +495,17 @@
     const generateBtn = document.getElementById("generateBtn");
     const copyBtn = document.getElementById("copyBtn");
     const publishBtn = document.getElementById("publishBtn");
+    const publicBtn = document.getElementById("publicBtn");
+    const publishPublicBtn = document.getElementById("publishPublicBtn");
     const xhsBtn = document.getElementById("xhsBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const downloadCoverBtn = document.getElementById("downloadCoverBtn");
+    const downloadPublicBtn = document.getElementById("downloadPublicBtn");
     const downloadXhsBtn = document.getElementById("downloadXhsBtn");
     const articlePreview = document.getElementById("articlePreview");
     const posterPreview = document.getElementById("posterPreview");
     const coverPreview = document.getElementById("coverPreview");
+    const publicPreview = document.getElementById("publicPreview");
     const xhsPreview = document.getElementById("xhsPreview");
     const cityInput = document.getElementById("city");
     const coverTitleInput = document.getElementById("cover_title");
@@ -498,6 +514,7 @@
     const playerRequirementInput = document.getElementById("player_requirement_desc");
     let latestContentHtml = "";
     let latestPreview = null;
+    let latestPublicPreview = null;
     let playerRequirementManuallyEdited = false;
 
     cityInput.addEventListener("input", () => {
@@ -586,6 +603,7 @@
       generateBtn.disabled = true;
       copyBtn.disabled = true;
       publishBtn.disabled = true;
+      publishPublicBtn.disabled = true;
       downloadBtn.hidden = true;
       downloadCoverBtn.hidden = true;
 
@@ -638,6 +656,41 @@
         statusEl.className = "status error";
       } finally {
         generateBtn.disabled = false;
+      }
+    });
+
+    publicBtn.addEventListener("click", async () => {
+      updatePlayerRequirement();
+      statusEl.textContent = "正在生成脱敏公众号海报...";
+      statusEl.className = "status";
+      publicBtn.disabled = true;
+      publishPublicBtn.disabled = true;
+      downloadPublicBtn.hidden = true;
+
+      const data = new FormData(form);
+
+      try {
+        const response = await fetch("/recruitment/generate-public-preview", {
+          method: "POST",
+          body: data,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "脱敏公众号海报生成失败");
+        }
+
+        latestPublicPreview = result;
+        const imageUrl = `${result.public_poster_image_url}?t=${Date.now()}`;
+        publicPreview.innerHTML = `<img class="poster" src="${imageUrl}" alt="脱敏公众号海报">`;
+        downloadPublicBtn.href = result.public_poster_image_url;
+        downloadPublicBtn.hidden = false;
+        publishPublicBtn.disabled = false;
+        statusEl.textContent = "脱敏公众号海报生成成功。";
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        publicBtn.disabled = false;
       }
     });
 
@@ -715,6 +768,36 @@
         statusEl.className = "status error";
       } finally {
         publishBtn.disabled = false;
+      }
+    });
+
+    publishPublicBtn.addEventListener("click", async () => {
+      if (!latestPublicPreview) return;
+      publishPublicBtn.disabled = true;
+      statusEl.textContent = "正在推送脱敏公众号草稿...";
+      statusEl.className = "status";
+
+      try {
+        const payload = new FormData();
+        payload.set("title", latestPublicPreview.title || "");
+        payload.set("digest", latestPublicPreview.digest || "");
+        payload.set("cover_image_path", latestPublicPreview.public_cover_image_path || "");
+        payload.set("poster_image_path", latestPublicPreview.public_poster_image_path || "");
+
+        const response = await fetch("/recruitment/publish-public-draft", {
+          method: "POST",
+          body: payload,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "脱敏草稿推送失败");
+        }
+        statusEl.textContent = `脱敏草稿推送成功，draft_id：${result.draft_id || "已生成"}`;
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        publishPublicBtn.disabled = false;
       }
     });
 

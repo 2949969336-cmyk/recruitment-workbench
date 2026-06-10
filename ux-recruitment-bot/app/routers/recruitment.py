@@ -7,6 +7,7 @@ from app.services.content_service import content_service
 from app.services.cover_service import cover_service
 from app.services.llm_service import llm_service
 from app.services.poster_service import poster_service
+from app.services.public_poster_service import public_poster_service
 from app.services.qr_service import qr_service
 from app.services.wechat_service import wechat_service
 from app.services.xiaohongshu_service import xiaohongshu_service
@@ -184,6 +185,120 @@ async def generate_xiaohongshu_poster(
         }
     except RuntimeError as e:
         logger.error(f"小红书海报生成失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/generate-public-preview", summary="生成脱敏公众号海报预览")
+async def generate_public_preview(
+    city: str = Form(..., description="活动城市"),
+    game_category: str = Form(..., description="游戏品类/名称"),
+    reward_amount: str = Form(..., description="礼金金额"),
+    player_requirement_desc: str = Form(..., description="玩家要求"),
+    game_examples: str = Form(..., description="游戏举例"),
+    activity_date: str = Form(..., description="活动时间"),
+    duration: str = Form(..., description="测试时长"),
+    location: str = Form(..., description="活动地点"),
+    activity_description: str = Form(..., description="活动内容"),
+    project_id: str = Form(..., description="项目编号"),
+    extra_notes: Optional[str] = Form(default=None, description="补充说明"),
+    poster_date: Optional[str] = Form(default=None, description="海报顶部展示日期"),
+    cover_deadline: Optional[str] = Form(default=None, description="封面活动截止日期"),
+    cover_title: Optional[str] = Form(default=None, description="封面标题"),
+    signup_link: Optional[str] = Form(default=None, description="报名链接"),
+    community_link: Optional[str] = Form(default=None, description="社群链接"),
+    signup_qr: Optional[UploadFile] = File(default=None, description="报名二维码 PNG/JPG"),
+    community_qr: Optional[UploadFile] = File(default=None, description="社群二维码 PNG/JPG"),
+) -> dict:
+    form = DemandForm(
+        city=city,
+        game_category=game_category,
+        reward_amount=reward_amount,
+        player_requirement_desc=player_requirement_desc,
+        game_examples=game_examples,
+        activity_date=activity_date,
+        duration=duration,
+        location=location,
+        activity_description=activity_description,
+        project_id=project_id,
+        extra_notes=extra_notes,
+    )
+
+    try:
+        signup_qr_bytes = await _read_optional_image(signup_qr, "报名二维码")
+        community_qr_bytes = await _read_optional_image(community_qr, "社群二维码")
+        signup_qr_content_type = signup_qr.content_type if signup_qr_bytes and signup_qr else None
+        community_qr_content_type = (
+            community_qr.content_type if community_qr_bytes and community_qr else None
+        )
+
+        if signup_qr_bytes is None:
+            signup_qr_bytes = qr_service.generate_png(signup_link)
+            signup_qr_content_type = "image/png" if signup_qr_bytes else None
+        if community_qr_bytes is None:
+            community_qr_bytes = qr_service.generate_png(community_link)
+            community_qr_content_type = "image/png" if community_qr_bytes else None
+
+        poster_result = await public_poster_service.render_public_poster(
+            form=form,
+            poster_date=poster_date,
+            signup_qr=signup_qr_bytes,
+            signup_qr_content_type=signup_qr_content_type,
+            community_qr=community_qr_bytes,
+            community_qr_content_type=community_qr_content_type,
+        )
+        cover_result = await cover_service.render_cover(
+            form=form,
+            deadline=cover_deadline,
+            cover_title=cover_title or f"招募{city}游戏玩家\n参与线下游戏体验",
+        )
+        content = content_service.generate_recruitment_content(form)
+        return {
+            "success": True,
+            "title": content["title"],
+            "digest": content["digest"],
+            "public_poster_image_url": poster_result["url"],
+            "public_poster_image_path": poster_result["path"],
+            "public_cover_image_url": cover_result["url"],
+            "public_cover_image_path": cover_result["path"],
+            "message": "脱敏公众号海报生成成功，尚未推送草稿箱。",
+        }
+    except RuntimeError as e:
+        logger.error(f"脱敏公众号海报生成失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post(
+    "/publish-public-draft",
+    response_model=PipelineResult,
+    summary="将脱敏公众号海报推送到公众号草稿箱",
+)
+async def publish_public_draft(
+    title: str = Form(..., description="文章标题"),
+    digest: str = Form(..., description="文章摘要"),
+    cover_image_path: str = Form(..., description="脱敏封面图本地路径"),
+    poster_image_path: str = Form(..., description="脱敏长海报本地路径"),
+) -> PipelineResult:
+    try:
+        cover_path = _resolve_generated_file(cover_image_path)
+        poster_path = _resolve_generated_file(poster_image_path)
+        draft_id = await wechat_service.push_image_article_to_draft(
+            title=title,
+            digest=digest,
+            cover_image_bytes=cover_path.read_bytes(),
+            cover_filename=cover_path.name,
+            body_image_bytes=poster_path.read_bytes(),
+            body_filename=poster_path.name,
+        )
+        return PipelineResult(
+            success=True,
+            title=title,
+            draft_id=draft_id,
+            message="脱敏公众号草稿已成功推送到草稿箱。",
+        )
+    except HTTPException:
+        raise
+    except RuntimeError as e:
+        logger.error(f"脱敏公众号草稿推送失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
