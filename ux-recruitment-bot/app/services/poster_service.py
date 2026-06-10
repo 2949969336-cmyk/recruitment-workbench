@@ -100,11 +100,50 @@ class PosterService:
                             .replaceAll(">", "&gt;")
                             .replaceAll('"', "&quot;")
                             .replaceAll("'", "&#039;");
+                        const toLines = (value) => escapeHtml(value).replaceAll("\\n", "<br>");
                         const setMultiline = (id, value) => {
                             const el = document.getElementById(id);
                             if (el) {
-                                el.innerHTML = escapeHtml(value).replaceAll("\\n", "<br>");
+                                el.innerHTML = toLines(value);
                             }
+                        };
+                        const injectSmartLayoutStyle = () => {
+                            const style = document.createElement("style");
+                            style.textContent = `
+                                #playerRequirementContent .requirement-line {
+                                    margin-bottom: 6px;
+                                }
+                                #playerRequirementContent .requirement-label {
+                                    display: inline;
+                                    font-weight: 700;
+                                    color: #2E7D32;
+                                }
+                                .detail-row {
+                                    margin-bottom: 8px;
+                                }
+                                .detail-grid {
+                                    display: grid;
+                                    grid-template-columns: max-content minmax(0, 1fr);
+                                    column-gap: 4px;
+                                    align-items: start;
+                                }
+                                .detail-key {
+                                    color: #666;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    white-space: nowrap;
+                                    line-height: 1.55;
+                                }
+                                .detail-grid .detail-value {
+                                    color: #333;
+                                    font-size: 14px;
+                                    line-height: 1.55;
+                                    min-width: 0;
+                                    word-break: keep-all;
+                                    overflow-wrap: break-word;
+                                }
+                            `;
+                            document.head.appendChild(style);
                         };
                         const setRequirements = (value) => {
                             const el = document.getElementById("playerRequirementContent");
@@ -115,22 +154,39 @@ class PosterService:
                                 .split("\\n")
                                 .map((line) => line.trim())
                                 .filter(Boolean);
-                            const hasCategory = lines.some((line) => /[:：]/.test(line));
                             el.innerHTML = lines.map((line, index) => {
                                 const match = line.match(/^([^:：]+)[:：](.*)$/);
                                 if (match) {
-                                    return `<div style="margin-bottom:6px;"><span class="requirement-label" style="display:inline;">${escapeHtml(match[1])}：</span>${escapeHtml(match[2].trim())}</div>`;
+                                    return `<div class="requirement-line"><span class="requirement-label">${escapeHtml(match[1])}：</span>${escapeHtml(match[2].trim())}</div>`;
                                 }
-                                if (!hasCategory && index === 0) {
-                                    return `<div class="requirement-label">${escapeHtml(line)}</div>`;
+                                const numberedMatch = line.match(/^(\\d+[、.．]\\s*.*?)([，,]\\s*如[:：]?.*)$/);
+                                if (numberedMatch) {
+                                    return `<div class="requirement-line"><span class="requirement-label">${escapeHtml(numberedMatch[1])}</span>${escapeHtml(numberedMatch[2])}</div>`;
                                 }
-                                return `<div style="margin-bottom:6px;">${escapeHtml(line)}</div>`;
+                                if (index === 0) {
+                                    return `<div class="requirement-line"><span class="requirement-label">${escapeHtml(line)}</span></div>`;
+                                }
+                                return `<div class="requirement-line">${escapeHtml(line)}</div>`;
                             }).join("");
                         };
+                        const setDetail = (id, label, value) => {
+                            const el = document.getElementById(id);
+                            const row = el ? el.closest(".detail-row") : null;
+                            if (!row) {
+                                return;
+                            }
+                            row.innerHTML = `
+                                <div class="detail-grid">
+                                    <span class="detail-key">${label}</span>
+                                    <span class="detail-value" id="${id}">${toLines(value)}</span>
+                                </div>
+                            `;
+                        };
+                        injectSmartLayoutStyle();
                         setRequirements(data.playerRequirement);
-                        setMultiline("activityTimeValue", data.activityTime);
-                        setMultiline("testDurationValue", data.testDuration);
-                        setMultiline("activityLocationValue", data.activityLocation);
+                        setDetail("activityTimeValue", "【活动时间】", data.activityTime);
+                        setDetail("testDurationValue", "【测试时长】", data.testDuration);
+                        setDetail("activityLocationValue", "【活动地点】", data.activityLocation);
                         setMultiline("activityContentValue", data.activityContent);
                         setMultiline("rewardAmount", data.rewardAmount);
                         const gamepad = document.querySelector(".deco-gamepad");

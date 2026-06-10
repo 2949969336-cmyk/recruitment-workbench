@@ -327,13 +327,13 @@
           <div class="field">
             <label for="player_type_count">玩家类型数量 *</label>
             <input id="player_type_count" type="number" min="1" max="6" value="1">
-            <div class="hint">每类会生成一个“类型：要求”，海报里类型名会自动加粗标绿。</div>
+            <div class="hint">每类会生成一个“类型：要求”。要求描述可不填，最终内容可以在“合并后的玩家要求”里手动调整。</div>
           </div>
           <div class="type-list" id="playerTypeList"></div>
           <div class="field">
             <label for="player_requirement_desc">合并后的玩家要求</label>
-            <textarea id="player_requirement_desc" name="player_requirement_desc" required readonly></textarea>
-            <div class="hint">这里会自动生成，也可以用于确认最终写入海报和公众号的内容。</div>
+            <textarea id="player_requirement_desc" name="player_requirement_desc" required></textarea>
+            <div class="hint">默认根据上方玩家类型生成；你也可以直接修改这里，最终会以这里的内容写入海报和公众号。</div>
           </div>
           <div class="field">
             <label for="game_examples">游戏举例 *</label>
@@ -498,6 +498,7 @@
     const playerRequirementInput = document.getElementById("player_requirement_desc");
     let latestContentHtml = "";
     let latestPreview = null;
+    let playerRequirementManuallyEdited = false;
 
     cityInput.addEventListener("input", () => {
       if (!coverTitleInput.dataset.edited) {
@@ -510,6 +511,9 @@
     });
 
     playerTypeCountInput.addEventListener("input", renderPlayerTypeInputs);
+    playerRequirementInput.addEventListener("input", () => {
+      playerRequirementManuallyEdited = true;
+    });
 
     function renderPlayerTypeInputs() {
       const count = Math.min(Math.max(Number(playerTypeCountInput.value) || 1, 1), 6);
@@ -531,7 +535,7 @@
               <input class="player-type-name" value="${escapeAttribute(saved.name)}" placeholder="例如：自走棋游戏玩家">
             </div>
             <div class="field">
-              <label>要求描述 *</label>
+              <label>要求描述</label>
               <textarea class="player-type-detail" placeholder="例如：金铲铲、多多自走棋等">${escapeHtml(saved.detail)}</textarea>
             </div>
           </div>
@@ -541,15 +545,19 @@
         });
         playerTypeList.appendChild(item);
       }
-      updatePlayerRequirement();
+      updatePlayerRequirement({ force: !playerRequirementManuallyEdited });
     }
 
-    function updatePlayerRequirement() {
+    function updatePlayerRequirement(options = {}) {
+      if (playerRequirementManuallyEdited && !options.force) {
+        return;
+      }
       const lines = Array.from(playerTypeList.querySelectorAll(".type-item"))
         .map((item) => {
           const name = item.querySelector(".player-type-name").value.trim();
           const detail = item.querySelector(".player-type-detail").value.trim();
           if (name && detail) return `${name}：${detail}`;
+          if (name) return name;
           if (detail) return detail;
           return "";
         })
