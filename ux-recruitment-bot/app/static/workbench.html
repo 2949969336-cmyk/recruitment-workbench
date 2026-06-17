@@ -6,494 +6,568 @@
   <title>公众号招募工作台</title>
   <style>
     :root {
-      --green: #177a37;
-      --green-2: #31a24c;
-      --mint: #e8f5e9;
-      --line: #d6e8d7;
-      --text: #1d2b1f;
-      --muted: #66736a;
-      --paper: #ffffff;
-      --danger: #b42318;
+      --ink: #26302b;
+      --muted: #657166;
+      --line: #d7e0d4;
+      --paper: #fffaf1;
+      --panel: #e0e9da;
+      --field: #718072;
+      --accent: #99cdd8;
+      --blue: #99cdd8;
+      --cream: #fef5e9;
+      --peach: #fde8d3;
+      --coral: #f8c8b2;
+      --sage: #e0e9da;
+      --moss: #657166;
+      --danger: #a65b4d;
+      --shadow: 0 22px 58px rgba(72, 89, 80, .16);
+      --font-en: "Gill Sans", "Gill Sans MT", "Trebuchet MS", Arial, sans-serif;
+      --font-cn: "Microsoft YaHei UI", "Microsoft YaHei", "微软雅黑", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+      --font-ui: "Gill Sans", "Gill Sans MT", "Trebuchet MS", "Microsoft YaHei UI", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     }
-
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      color: var(--text);
-      background: #edf7ef;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      min-width: 1180px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 8%, rgba(224, 233, 218, .34), transparent 30%),
+        radial-gradient(circle at 88% 18%, rgba(255, 255, 255, .72), transparent 32%),
+        linear-gradient(135deg, #fbfdf9 0%, #f2f8f1 46%, #ffffff 100%);
+      font-family: var(--font-ui);
     }
-
-    .app {
+    .workspace { width: min(1480px, calc(100vw - 48px)); margin: 0 auto; padding: 28px 0 72px; }
+    .hero {
       display: grid;
-      grid-template-columns: minmax(420px, 560px) minmax(520px, 1fr);
-      min-height: 100vh;
+      grid-template-columns: minmax(420px, 1fr) minmax(430px, 560px);
+      gap: 42px;
+      align-items: end;
+      padding: 4px 0 16px;
+      border-bottom: 3px solid rgba(38, 48, 43, .88);
     }
-
-    .panel {
-      padding: 24px;
-      border-right: 1px solid var(--line);
-      background: var(--paper);
-      overflow: auto;
-    }
-
-    .preview {
-      padding: 24px;
-      overflow: auto;
-    }
-
-    h1 {
-      margin: 0 0 6px;
-      color: var(--green);
-      font-size: 26px;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      margin: 0 0 22px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .section {
-      margin: 22px 0;
-      padding-top: 14px;
-      border-top: 1px solid var(--line);
-    }
-
-    .section-title {
-      margin: 0 0 14px;
-      color: var(--green);
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .grid {
+    .hero-card {
+      min-height: 150px;
+      border-radius: 34px;
+      background:
+        linear-gradient(90deg, rgba(38,48,43,.70), rgba(38,48,43,.36) 48%, rgba(254,245,233,.22)),
+        var(--game-bg, linear-gradient(135deg, #99cdd8, #fef5e9 52%, #f8c8b2));
+      background-size: cover;
+      background-position: center;
+      color: #fff;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      align-content: end;
+      padding: 22px 26px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 18px 44px rgba(72, 89, 80, .10);
+      isolation: isolate;
     }
-
-    label {
+    .hero-card::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgba(255,255,255,.48); border-radius: 27px; z-index: -1; }
+    .hero-card::after { content: ""; position: absolute; width: 164px; height: 164px; right: -44px; top: -42px; border-radius: 50%; background: rgba(254,245,233,.38); z-index: -1; }
+    .game-kicker { font: 700 13px/1 var(--font-en); letter-spacing: .16em; text-transform: uppercase; opacity: .86; }
+    .game-title { margin-top: 10px; font: 700 28px/1.2 var(--font-cn); text-shadow: 0 8px 22px rgba(0,0,0,.18); }
+    .hero-title h1, .subtitle, .hello strong, .hello span, .channel-tabs span, .nav-list a, .metric-label, .metric-value, button, .button-link {
+      font-family: var(--font-ui);
+    }
+    .game-kicker, .subtitle, .hello span, .side-head, .stage-title, .chart-title {
+      font-family: var(--font-en);
+    }
+    .hero-title h1, .game-title, .section-title, label {
+      font-family: var(--font-cn);
+    }
+    .hero-title { text-align: right; position: relative; }
+    .hero-title::before { content: "◀◀◀"; position: absolute; right: 0; top: -28px; color: var(--moss); font-size: 24px; letter-spacing: 2px; }
+    h1 { margin: 0; color: #050507; font-family: var(--font-cn); font-size: 54px; line-height: 1.05; font-weight: 700; }
+    .subtitle { margin: 10px 4px 0 0; font-size: 27px; font-weight: 700; color: #1c1a18; }
+    .meta-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; padding: 14px 4px 0; font-family: var(--font-cn); font-weight: 700; color: #2e333a; }
+    .dashboard { display: grid; grid-template-columns: 270px minmax(440px, 1fr) minmax(460px, 560px); gap: 30px; align-items: start; padding: 38px 0 42px; position: relative; }
+    .sidebar { min-height: 520px; border-radius: 30px; background: rgba(255, 255, 255, .72); padding: 30px 24px; box-shadow: 0 18px 44px rgba(72, 89, 80, .10); position: sticky; top: 18px; border: 1px solid rgba(101,113,102,.12); backdrop-filter: blur(16px); }
+    .side-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 34px; font-size: 23px; font-weight: 700; }
+    .side-mark { width: 46px; height: 46px; border-radius: 14px; background: #fff center/72% no-repeat url('/static/web-icons/nav-interface.jpg'); box-shadow: 0 12px 24px rgba(101,113,102,.16), inset 0 0 0 1px rgba(101,113,102,.12); transition: transform .2s ease; }
+    .nav-list { display: grid; gap: 24px; margin: 0; padding: 0; list-style: none; }
+    .nav-list a { display: grid; grid-template-columns: 42px 1fr; gap: 16px; align-items: center; color: #2f343d; text-decoration: none; font-size: 18px; font-weight: 700; }
+    .nav-dot { width: 38px; height: 38px; border-radius: 14px; background: #fff center/70% no-repeat; box-shadow: 0 10px 20px rgba(101,113,102,.12), inset 0 0 0 1px rgba(101,113,102,.10); transition: transform .2s ease, box-shadow .2s ease; }
+    .overview { display: grid; gap: 22px; }
+    .search-pill { width: min(420px, 100%); height: 48px; border: 2px solid #252321; border-radius: 999px; background: rgba(242, 248, 241, .92); display: grid; grid-template-columns: 1fr 70px; align-items: center; overflow: hidden; font-family: var(--font-cn); font-weight: 700; color: #33312e; box-shadow: 0 14px 28px rgba(72,89,80,.08); }
+    .search-pill input { height: 100%; border: 0; border-radius: 0; padding: 0 20px 0 24px; background: rgba(255,255,255,.38); color: var(--ink); box-shadow: none; font: 700 16px/1 var(--font-cn); }
+    .search-pill input::placeholder { color: rgba(38,48,43,.58); }
+    .search-pill input:focus { background: rgba(255,255,255,.76); box-shadow: none; }
+    .search-pill button { width: 70px; height: 48px; min-height: 48px; min-width: 70px; border-left: 2px solid #252321; border-radius: 999px; padding: 0; background: var(--moss); box-shadow: none; font: 700 22px/1 var(--font-en); }
+    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .metric-card { min-height: 96px; padding: 17px 56px 17px 17px; border-radius: 26px; background: rgba(255,255,255,.84); border: 1px solid rgba(101,113,102,.12); box-shadow: 0 18px 34px rgba(88, 107, 96, .1); position: relative; overflow: hidden; }
+    .metric-card::after { content: ""; position: absolute; right: -22px; bottom: -26px; width: 82px; height: 82px; border-radius: 28px; background: rgba(153,205,216,.22); transform: rotate(18deg); }
+    .metric-icon { position: absolute; right: 15px; top: 15px; width: 31px; height: 31px; border-radius: 11px; background: #fff center/76% no-repeat; box-shadow: 0 10px 20px rgba(101,113,102,.12), inset 0 0 0 1px rgba(101,113,102,.08); z-index: 1; transition: transform .2s ease; }
+    .metric-label { color: #76736d; font: 800 12px/1.2 var(--font-ui); }
+    .metric-value { margin-top: 8px; color: #20242d; font: 800 30px/1 var(--font-en); }
+    .charts { display: grid; grid-template-columns: minmax(210px, 260px) minmax(280px, 1fr); gap: 26px; align-items: center; margin-top: 8px; }
+    .chart-card { min-height: 300px; border-radius: 32px; background: rgba(255,255,255,.80); padding: 20px; border: 1px solid rgba(101,113,102,.12); box-shadow: 0 18px 44px rgba(72, 89, 80, .10); backdrop-filter: blur(14px); }
+    .chart-title { margin: 0 0 14px; color: #20242d; font: 700 17px/1.2 var(--font-ui); }
+    .donut { width: 210px; height: 210px; margin: 10px auto 0; border-radius: 50%; background: conic-gradient(#99cdd8 0 34%, #f8c8b2 34% 67%, #657166 67% 100%); position: relative; box-shadow: 0 18px 38px rgba(101,113,102,.16); }
+    .donut::after { content: ""; position: absolute; inset: 58px; border-radius: 50%; background: #faf8f2; box-shadow: inset 0 0 0 1px rgba(37,35,33,.08); }
+    .legend { display: grid; gap: 8px; margin-top: 14px; color: #514d47; font: 700 13px/1.4 var(--font-ui); }
+    .legend span { display: flex; align-items: center; gap: 8px; }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .line-chart { width: 100%; height: 250px; display: block; overflow: visible; }
+    .channel-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 18px; }
+    .channel-tabs span { min-height: 50px; border-radius: 999px; display: grid; place-items: center; background: var(--moss); color: #fff; font-family: var(--font-cn); font-size: 22px; font-weight: 700; box-shadow: 0 14px 28px rgba(101,113,102,.16); }
+    .hello { text-align: right; margin-bottom: 28px; padding-right: 10px; }
+    .hello strong { display: block; font-size: 48px; line-height: 1; font-weight: 400; color: #10131a; }
+    .hello span { display: block; margin-top: 8px; color: var(--muted); font-size: 16px; }
+    .stage-title { margin: 0 0 16px; font-size: 26px; font-weight: 700; }
+    .sidebar-icon-preview {
+      margin: 28px 0 0;
+      min-height: 132px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.72);
+      box-shadow: inset 0 0 0 1px rgba(101,113,102,.10);
+      position: relative;
+      overflow: hidden;
+      padding: 14px;
+    }
+    .mini-icon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .mini-icon-grid img { width: 100%; aspect-ratio: 1; object-fit: contain; padding: 7px; border-radius: 14px; background: rgba(255,255,255,.86); box-shadow: 0 8px 16px rgba(101,113,102,.08); transition: transform .18s ease; }
+    .mini-icon-grid img:hover { transform: translateY(-3px) rotate(-3deg); }
+    .sidebar-icon-preview::after {
+      content: "mini icon kit";
       display: block;
-      margin-bottom: 7px;
-      font-size: 14px;
-      font-weight: 600;
+      margin-top: 12px;
+      color: var(--moss);
+      font: 900 12px/1 var(--font-en);
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
-
-    input,
-    textarea {
-      width: 100%;
-      border: 1px solid #cfd8d2;
-      border-radius: 6px;
-      padding: 10px 11px;
-      color: var(--text);
-      background: #fff;
-      font: inherit;
-      outline: none;
+    .metric-card, .chart-card, .section, .surface, .hero-card {
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
-
-    textarea {
-      min-height: 82px;
-      resize: vertical;
-      line-height: 1.5;
+    .metric-card { cursor: pointer; }
+    .metric-card:hover, .chart-card:hover, .section:hover, .surface:hover, .hero-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 24px 54px rgba(72, 89, 80, .14);
+      border-color: rgba(101,113,102,.2);
     }
-
-    input:focus,
-    textarea:focus {
-      border-color: var(--green-2);
-      box-shadow: 0 0 0 3px rgba(49, 162, 76, 0.14);
+    .metric-card.is-active {
+      box-shadow: 0 0 0 3px rgba(153,205,216,.38), 0 24px 54px rgba(72, 89, 80, .14);
     }
-
-    .field { margin-bottom: 14px; }
-    .hint {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
+    .jump-highlight {
+      animation: jumpPulse 1.2s ease;
     }
-
-    .check-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 14px;
+    @keyframes jumpPulse {
+      0% { box-shadow: 0 0 0 0 rgba(153,205,216,.0); }
+      28% { box-shadow: 0 0 0 6px rgba(153,205,216,.46), 0 24px 54px rgba(72,89,80,.14); }
+      100% { box-shadow: 0 0 0 0 rgba(153,205,216,.0); }
     }
-
-    .check-row input {
-      width: auto;
-      margin: 0;
+    .nav-list a {
+      padding: 8px 10px;
+      border-radius: 999px;
+      transition: background .2s ease, transform .2s ease;
     }
-
-    .type-list {
-      display: grid;
-      gap: 12px;
+    .nav-list a:hover, .nav-list a.is-active {
+      background: rgba(224,233,218,.72);
+      transform: translateX(3px);
     }
-
-    .type-item {
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fbfefb;
+    .nav-list a:hover .nav-dot, .nav-list a.is-active .nav-dot, .metric-card:hover .metric-icon, .metric-card.is-active .metric-icon, .side-mark:hover {
+      transform: scale(1.08) rotate(-4deg);
+      box-shadow: 0 14px 24px rgba(101,113,102,.18), 0 0 0 4px rgba(153,205,216,.18);
     }
-
-    .type-item-title {
-      margin: 0 0 10px;
-      color: var(--green);
-      font-size: 14px;
-      font-weight: 700;
+    .empty {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.92)),
+        url('/static/web-icons/empty-state-blue.jpg') center/cover no-repeat;
+      border-radius: 24px;
+      box-shadow: inset 0 0 0 1px rgba(101,113,102,.08);
     }
-
-    .actions {
-      position: sticky;
-      bottom: 0;
-      display: flex;
-      gap: 10px;
-      padding-top: 16px;
-      background: linear-gradient(rgba(255,255,255,0), #fff 28%);
-    }
-
-    button,
-    .button-link {
-      min-height: 42px;
-      border: 0;
-      border-radius: 6px;
-      padding: 0 16px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
+    .micro-action {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
     }
-
-    .primary { color: #fff; background: var(--green-2); }
-    .secondary { color: var(--green); background: var(--mint); }
-    button:disabled { opacity: 0.65; cursor: wait; }
-
-    .result-layout {
-      display: grid;
-      grid-template-columns: minmax(320px, 500px) minmax(320px, 1fr);
-      gap: 18px;
-      align-items: start;
+    .micro-action::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.42);
+      box-shadow: inset 0 0 0 5px rgba(153,205,216,.55);
     }
-
-    .surface {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--paper);
-      box-shadow: 0 12px 30px rgba(17, 74, 35, 0.08);
+    .form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 34px; align-items: start; }
+    form { display: contents; }
+    .main-column, .side-column { display: grid; gap: 30px; }
+    .section { margin: 0; padding: 26px 28px 28px; border: 1px solid rgba(101,113,102,.12); border-radius: 28px; background: rgba(255, 255, 255, .74); box-shadow: 0 18px 44px rgba(72, 89, 80, .10); backdrop-filter: blur(14px); }
+    .section-title { margin: 0 0 22px; color: #191817; font-family: var(--font-cn); font-size: 22px; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 28px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .field { margin: 0 0 18px; }
+    .grid .field { margin: 0; }
+    label { display: block; margin-bottom: 9px; color: #1d1b19; font-family: var(--font-cn); font-size: 15px; font-weight: 700; }
+    input, textarea { width: 100%; border: 0; border-radius: 16px; padding: 12px 14px; color: #fffdf8; background: var(--field); font: 16px/1.5 var(--font-ui); outline: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,.62); }
+    input:focus, textarea:focus { background: var(--moss); box-shadow: 0 0 0 4px rgba(153, 205, 216, .34); }
+    textarea { min-height: 82px; resize: vertical; }
+    .tall textarea, textarea.tall { min-height: 150px; }
+    input[type="file"] { color: #fff; padding: 10px; }
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: #77746f; box-shadow: none; }
+    .hint { margin-top: 7px; color: #5f5b55; font: 12px/1.5 var(--font-ui); }
+    .check-row { display: flex; align-items: center; gap: 9px; margin: 2px 0 16px; color: #22201e; font-family: var(--font-cn); font-weight: 700; }
+    .type-list { display: grid; gap: 18px; }
+    .type-item { padding: 18px; border: 1px solid rgba(101,113,102,.13); border-radius: 22px; background: rgba(255,255,255,.64); }
+    .type-item-title { margin: 0 0 14px; color: #2e2c29; font: 700 15px var(--font-ui); }
+    .tools { margin-top: 36px; padding: 18px 0 0; background: transparent; }
+    .actions { display: flex; flex-wrap: nowrap; gap: 12px; justify-content: center; align-items: center; padding: 0; background: transparent; position: static; overflow-x: auto; }
+    .action-group, .action-group.downloads { display: contents; }
+    button, .button-link { min-height: 48px; border: 0; border-radius: 999px; padding: 0 22px; color: #fff; background: var(--moss); font: 700 15px/1.2 var(--font-ui); text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 14px 24px rgba(101,113,102,.18); white-space: nowrap; }
+    .primary { background: #5f8f98; }
+    .secondary { background: var(--moss); color: #fff; }
+    button:hover, .button-link:hover { filter: brightness(.94); }
+    button:disabled { opacity: .58; cursor: wait; }
+    .status { min-height: 22px; margin: 12px 0 0; color: #514d47; text-align: center; font: 13px/1.5 var(--font-ui); }
+    .error { color: var(--danger); }
+    .preview { margin-top: 44px; padding: 0; overflow: visible; }
+    .preview-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+    .preview-head h2 { margin: 0; font-size: 28px; }
+    .preview-tabs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .preview-tab { min-height: 38px; padding: 0 16px; border-radius: 999px; background: #e0e9da; color: #2d2b28; box-shadow: none; }
+    .preview-tab.active { background: #77746f; color: #fff; }
+    .result-layout { display: block; }
+    .surface { display: none; border: 1px solid rgba(101,113,102,.12); border-radius: 30px; background: rgba(255, 255, 255, .74); box-shadow: 0 18px 44px rgba(72, 89, 80, .10); overflow: hidden; }
+    .surface.active { display: block; }
+    .surface-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid rgba(37,35,33,.12); }
+    .surface-title { margin: 0; color: #1f1d1b; font: 800 18px "Microsoft YaHei", sans-serif; }
+    .surface-body { min-height: 360px; padding: 22px; background: rgba(250,249,245,.66); }
+    .output-summary { display: grid; gap: 14px; }
+    .output-note { padding: 14px 16px; border-radius: 8px; background: rgba(255,255,255,.62); color: #55514b; font: 14px/1.6 var(--font-ui); }
+    .output-note strong { display: block; margin-bottom: 4px; color: #2f2d2a; }
+    .article-title { margin: 0 0 8px; font: 700 21px/1.35 var(--font-ui); }
+    .digest { margin: 0 0 14px; color: #5f5b55; font: 14px/1.5 var(--font-ui); }
+    .article { max-height: 620px; overflow: auto; line-height: 1.7; font-family: var(--font-cn); }
+    .article h1 { font-size: 22px; }
+    .article h2 { margin: 20px 0 8px; font-size: 17px; }
+    .poster, .cover-image, .preview-cover-small, .preview-poster-small, .xhs-image { display: block; max-width: 100%; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(37,35,33,.12); background: #f7f4ed; }
+    .poster { width: min(520px, 100%); }
+    .cover-image { width: min(760px, 100%); }
+    .xhs-image { width: min(420px, 100%); }
+    .preview-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+    .preview-block-title { margin: 0 0 8px; font: 800 14px var(--font-ui); }
+    .preview-poster-small { max-height: 430px; object-fit: contain; }
+    .empty { min-height: 220px; display: grid; place-items: center; padding: 24px; color: #6a665f; text-align: center; font: 14px/1.6 var(--font-ui); }
+    .hero-title h1, .subtitle, .hello strong, .channel-tabs span, .nav-list a span:last-child, .metric-label, .metric-value, button, .button-link {
+      white-space: nowrap;
+    }
+    .hero-title h1 {
+      font-size: clamp(42px, 3.35vw, 54px);
+      letter-spacing: 0;
+    }
+    .subtitle {
+      font-size: clamp(22px, 1.9vw, 27px);
+      letter-spacing: 0;
+    }
+    .hello strong {
+      font-size: clamp(38px, 3vw, 48px);
+      letter-spacing: 0;
+    }
+    .game-title {
+      max-width: calc(100% - 150px);
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0;
     }
-
-    .surface-header {
+    .channel-tabs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .channel-tabs span {
+      min-width: 0;
+      font-size: clamp(18px, 1.35vw, 22px);
+    }
+    .metric-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .actions {
+      row-gap: 0;
+    }
+    button, .button-link {
+      min-width: max-content;
+    }
+    .channel-tabs button {
+      min-height: 50px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--moss);
+      color: #fff;
+      font-family: var(--font-cn);
+      font-size: clamp(18px, 1.35vw, 22px);
+      font-weight: 700;
+      box-shadow: 0 14px 28px rgba(101,113,102,.16);
+      padding: 0 20px;
+    }
+    .channel-tabs button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 36px rgba(101,113,102,.2);
+    }
+    .history-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      pointer-events: none;
+    }
+    .history-drawer.open {
+      display: block;
+      pointer-events: auto;
+    }
+    .history-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(38,48,43,.18);
+      backdrop-filter: blur(3px);
+    }
+    .history-panel {
+      position: absolute;
+      right: 26px;
+      top: 26px;
+      bottom: 26px;
+      width: min(520px, calc(100vw - 52px));
+      border-radius: 32px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 28px 76px rgba(72,89,80,.22);
+      border: 1px solid rgba(101,113,102,.14);
+      overflow: hidden;
+      transform: translateX(22px);
+      opacity: 0;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+    .history-drawer.open .history-panel {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .history-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
+      gap: 16px;
+      padding: 22px 24px;
+      border-bottom: 1px solid rgba(101,113,102,.12);
+      background: linear-gradient(135deg, rgba(242,248,241,.9), rgba(255,255,255,.92));
     }
-
-    .surface-title {
+    .history-head h2 {
       margin: 0;
-      color: var(--green);
-      font-size: 16px;
+      font: 700 24px/1.2 var(--font-ui);
+      color: var(--ink);
     }
-
-    .surface-body { padding: 16px; }
-
-    .article-title {
-      margin: 0 0 8px;
-      font-size: 18px;
-      line-height: 1.35;
+    .history-close {
+      min-width: 42px;
+      width: 42px;
+      min-height: 42px;
+      padding: 0;
+      border-radius: 50%;
+      background: #eef6f4;
+      color: var(--moss);
+      box-shadow: none;
+      font-size: 24px;
     }
-
-    .digest {
-      margin: 0 0 16px;
-      color: var(--muted);
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .history-import {
+      min-height: 38px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--moss);
+      box-shadow: inset 0 0 0 1px rgba(101,113,102,.14);
       font-size: 13px;
-      line-height: 1.5;
     }
-
-    .article {
-      max-height: 620px;
+    .history-list {
+      height: calc(100% - 87px);
       overflow: auto;
-      line-height: 1.65;
-      font-size: 14px;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
     }
-
-    .article h1 { font-size: 22px; }
-    .article h2 {
-      margin: 20px 0 8px;
-      color: var(--green);
-      font-size: 17px;
+    .history-card {
+      border-radius: 24px;
+      background: rgba(254,245,233,.55);
+      border: 1px solid rgba(101,113,102,.10);
+      padding: 14px;
+      box-shadow: 0 14px 30px rgba(72,89,80,.08);
     }
-
-    .poster {
+    .history-card h3 {
+      margin: 0 0 6px;
+      font: 700 16px/1.35 var(--font-cn);
+      color: var(--ink);
+    }
+    .history-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .history-delete {
+      min-width: 34px;
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.86);
+      color: #a65b4d;
+      box-shadow: inset 0 0 0 1px rgba(166,91,77,.18);
+      font-size: 18px;
+      flex: 0 0 auto;
+    }
+    .history-delete:hover {
+      background: #fff1ed;
+      transform: scale(1.06);
+    }
+    .history-meta {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font: 13px/1.4 var(--font-ui);
+    }
+    .history-images {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .history-image-link {
+      display: block;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(101,113,102,.10);
+      text-decoration: none;
+      color: var(--muted);
+      font: 700 12px/1.3 var(--font-ui);
+    }
+    .history-image-link img {
       display: block;
       width: 100%;
-      max-width: 520px;
-      margin: 0 auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--mint);
+      height: 132px;
+      object-fit: cover;
+      background: #f7faf5;
     }
-
-    .cover-image {
+    .history-image-link span {
       display: block;
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #5d12e8;
+      padding: 8px 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-
-    .xhs-image {
-      display: block;
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff7dd;
-    }
-
-    .empty {
-      min-height: 360px;
+    .history-empty {
+      min-height: 260px;
       display: grid;
       place-items: center;
-      color: var(--muted);
       text-align: center;
       padding: 28px;
-    }
-
-    .status {
-      min-height: 20px;
       color: var(--muted);
-      font-size: 13px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.94)),
+        url('/static/web-icons/empty-state-blue.jpg') center/cover no-repeat;
+      font: 700 14px/1.6 var(--font-ui);
     }
-
-    .error { color: var(--danger); }
-
-    @media (max-width: 1100px) {
-      .app,
-      .result-layout {
-        grid-template-columns: 1fr;
-      }
-      .panel { border-right: 0; border-bottom: 1px solid var(--line); }
-    }
-
-    @media (max-width: 640px) {
-      .grid { grid-template-columns: 1fr; }
-      .panel,
-      .preview { padding: 16px; }
+    @media (max-width: 1200px) {
+      body { min-width: 0; }
+      .workspace { width: calc(100vw - 28px); }
+      .dashboard, .form-layout, .hero { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .charts { grid-template-columns: 1fr; }
+      .grid, .grid.two { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <main class="app">
-    <section class="panel">
-      <h1>公众号招募工作台</h1>
-      <p class="subtitle">填写活动信息，生成公众号文案和招募海报。</p>
-
-      <form id="recruitmentForm">
-        <div class="section">
-          <h2 class="section-title">基本信息</h2>
-          <div class="grid">
-            <div class="field">
-              <label for="city">城市名称 *</label>
-              <input id="city" name="city" value="杭州" required>
-            </div>
-            <div class="field">
-              <label for="game_category">游戏品类/名称 *</label>
-              <input id="game_category" name="game_category" value="燕云十六声" required>
-            </div>
-          </div>
-          <div class="field">
-            <label for="activity_date">活动完整时间 *</label>
-            <textarea id="activity_date" name="activity_date" required>5月19日（周二）或 5月20日（周三），下午14:30-18:00</textarea>
-          </div>
-          <div class="field">
-            <label for="poster_date">海报展示日期</label>
-            <input id="poster_date" name="poster_date" value="5.19-5.20" placeholder="例如：5.19-5.20">
-            <div class="hint">用于海报顶部短标签，公众号正文仍使用完整时间。</div>
+  <main class="workspace">
+    <header class="hero">
+      <div>
+        <div class="hero-card" id="gameHero">
+          <span class="game-kicker">Random Game Poster</span>
+          <strong class="game-title" id="gameHeroTitle">网易游戏招募灵感</strong>
+        </div>
+        <div class="meta-row"><span id="todayText">2026年06月16日</span><span id="todayPublishedText">今日发布0篇</span><span id="totalPublishedText">累计发布0篇</span></div>
+      </div>
+      <div class="hero-title"><h1>公众号招募工作台</h1><div class="subtitle">Post Gaming Recruitment</div></div>
+    </header>
+    <section class="dashboard" id="interface">
+      <aside class="sidebar">
+        <div class="side-head"><span>Interface</span><span class="side-mark"></span></div>
+        <ul class="nav-list">
+          <li><a href="#operating"><span class="nav-dot" style="background-image:url('/static/web-icons/nav-operating.jpg')"></span><span>Operating Stage</span></a></li>
+          <li><a href="#data"><span class="nav-dot" style="background-image:url('/static/web-icons/nav-data.jpg')"></span><span>Data board</span></a></li>
+          <li><a href="#draft"><span class="nav-dot" style="background-image:url('/static/web-icons/nav-draft.jpg')"></span><span>Draft</span></a></li>
+          <li><a href="#interface"><span class="nav-dot" style="background-image:url('/static/web-icons/nav-interface.jpg')"></span><span>Interface</span></a></li>
+        </ul>
+        <div class="sidebar-icon-preview" aria-hidden="true">
+          <div class="mini-icon-grid">
+            <img src="/static/web-icons/decor-1.jpg" alt="">
+            <img src="/static/web-icons/decor-2.jpg" alt="">
+            <img src="/static/web-icons/decor-3.jpg" alt="">
+            <img src="/static/web-icons/decor-4.jpg" alt="">
+            <img src="/static/web-icons/decor-5.jpg" alt="">
+            <img src="/static/web-icons/decor-6.jpg" alt="">
           </div>
         </div>
-
-        <div class="section">
-          <h2 class="section-title">玩家要求</h2>
-          <div class="field">
-            <label for="player_type_count">玩家类型数量 *</label>
-            <input id="player_type_count" type="number" min="1" max="6" value="1">
-            <div class="hint">每类会生成一个“类型：要求”。要求描述可不填，最终内容可以在“合并后的玩家要求”里手动调整。</div>
+      </aside>
+      <div class="overview" id="data">
+        <form class="search-pill" id="quickSearchForm" role="search"><input id="quickSearchInput" type="search" placeholder="搜索：活动时间 / 活动地点 / 礼金"><button type="submit" aria-label="搜索跳转" title="搜索">⌕</button></form>
+        <div class="metric-row">
+          <div class="metric-card"><span class="metric-icon" style="background-image:url('/static/web-icons/metric-ux.jpg')" aria-hidden="true"></span><div class="metric-label">UX 海报</div><div class="metric-value" id="uxCount">0</div></div>
+          <div class="metric-card"><span class="metric-icon" style="background-image:url('/static/web-icons/metric-shuige.jpg')" aria-hidden="true"></span><div class="metric-label">水哥脱敏</div><div class="metric-value" id="publicCount">0</div></div>
+          <div class="metric-card"><span class="metric-icon" style="background-image:url('/static/web-icons/metric-redbook.jpg')" aria-hidden="true"></span><div class="metric-label">小红书</div><div class="metric-value" id="xhsCount">0</div></div>
+        </div>
+        <div class="charts">
+          <div class="chart-card">
+            <h3 class="chart-title">渠道占比</h3>
+            <div class="donut" id="channelDonut" aria-label="渠道占比图"></div>
+            <div class="legend" id="channelLegend"></div>
           </div>
-          <div class="type-list" id="playerTypeList"></div>
-          <div class="field">
-            <label for="player_requirement_desc">合并后的玩家要求</label>
-            <textarea id="player_requirement_desc" name="player_requirement_desc" required></textarea>
-            <div class="hint">默认根据上方玩家类型生成；你也可以直接修改这里，最终会以这里的内容写入海报和公众号。</div>
-          </div>
-          <div class="field">
-            <label for="game_examples">游戏举例 *</label>
-            <input id="game_examples" name="game_examples" value="燕云十六声" required>
+          <div class="chart-card">
+            <h3 class="chart-title">近 7 天下载发布</h3>
+            <svg class="line-chart" id="trendChart" viewBox="0 0 420 250" role="img" aria-label="近 7 天发布趋势"></svg>
           </div>
         </div>
-
-        <div class="section">
-          <h2 class="section-title">活动详情</h2>
-          <div class="grid">
-            <div class="field">
-              <label for="duration">测试时长 *</label>
-              <textarea id="duration" name="duration" required>3.5H</textarea>
-            </div>
-            <div class="field">
-              <label for="reward_amount">礼金 *</label>
-              <textarea id="reward_amount" name="reward_amount" required>200元+50元交通补贴</textarea>
-            </div>
-          </div>
-          <div class="field">
-            <label for="location">活动地点 *</label>
-            <textarea id="location" name="location" required>杭州滨江网易大厦一期（网商路599号）</textarea>
-          </div>
-          <div class="field">
-            <label for="activity_description">活动内容 *</label>
-            <textarea id="activity_description" name="activity_description" required>体验部分新内容，并给出自己的看法和建议</textarea>
-          </div>
-          <div class="field">
-            <label for="project_id">项目编号 *</label>
-            <input id="project_id" name="project_id" value="20260526" required>
-          </div>
-          <div class="field">
-            <label for="extra_notes">补充说明</label>
-            <textarea id="extra_notes" name="extra_notes" placeholder="可选"></textarea>
-          </div>
-          <label class="check-row" for="use_llm">
-            <input id="use_llm" name="use_llm" type="checkbox" value="true">
-            使用 LLM 润色文案
-          </label>
-          <div class="hint">默认关闭，生成更快也更稳定；需要改写语气时再打开。</div>
+      </div>
+      <div>
+        <div class="hello"><strong>Hello Sarang</strong><span>Let's check your program</span></div>
+        <div class="channel-tabs"><button type="button" data-history-channel="ux">UX</button><button type="button" data-history-channel="public">水哥</button><button type="button" data-history-channel="xhs">小红书</button></div>
+        <div class="chart-card">
+          <h3 class="chart-title">渠道走势</h3>
+          <svg class="line-chart" id="channelTrendChart" viewBox="0 0 560 260" role="img" aria-label="渠道走势"></svg>
         </div>
-
-        <div class="section">
-          <h2 class="section-title">封面海报</h2>
-          <label class="check-row" for="include_cover">
-            <input id="include_cover" name="include_cover" type="checkbox" value="true" checked>
-            同时生成横版封面海报
-          </label>
-          <div class="grid">
-            <div class="field">
-              <label for="cover_deadline">活动截止日期</label>
-              <input id="cover_deadline" name="cover_deadline" value="5月19日" placeholder="例如：5月19日">
-            </div>
-            <div class="field">
-              <label for="cover_title">封面标题</label>
-              <textarea id="cover_title" name="cover_title">招募杭州游戏玩家
-参与线下游戏体验</textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <h2 class="section-title">二维码</h2>
-          <div class="grid">
-            <div class="field">
-              <label for="signup_link">报名链接</label>
-              <input id="signup_link" name="signup_link" placeholder="粘贴报名问卷链接">
-              <div class="hint">填写链接后会自动生成二维码。</div>
-            </div>
-            <div class="field">
-              <label for="community_link">社群链接</label>
-              <input id="community_link" name="community_link" placeholder="粘贴社群链接">
-              <div class="hint">填写链接后会自动生成二维码。</div>
-            </div>
-          </div>
-          <div class="grid">
-            <div class="field">
-              <label for="signup_qr">报名二维码图片</label>
-              <input id="signup_qr" name="signup_qr" type="file" accept="image/png,image/jpeg,image/jpg">
-              <div class="hint">可选。上传图片时优先使用图片。</div>
-            </div>
-            <div class="field">
-              <label for="community_qr">社群二维码图片</label>
-              <input id="community_qr" name="community_qr" type="file" accept="image/png,image/jpeg,image/jpg">
-              <div class="hint">可选。上传图片时优先使用图片。</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="primary" id="generateBtn" type="submit">生成预览</button>
-          <button class="secondary" id="copyBtn" type="button" disabled>复制文案</button>
-          <button class="secondary" id="publishBtn" type="button" disabled>推送草稿箱</button>
-          <button class="secondary" id="publicBtn" type="button">生成脱敏公众号</button>
-          <button class="secondary" id="publishPublicBtn" type="button" disabled>推送脱敏草稿</button>
-          <button class="secondary" id="xhsBtn" type="button">生成小红书</button>
-          <a class="button-link secondary" id="downloadBtn" href="#" download hidden>下载海报</a>
-          <a class="button-link secondary" id="downloadCoverBtn" href="#" download hidden>下载封面</a>
-          <a class="button-link secondary" id="downloadPublicBtn" href="#" download hidden>下载脱敏海报</a>
-          <a class="button-link secondary" id="downloadXhsBtn" href="#" download hidden>下载小红书</a>
-        </div>
-        <p class="status" id="status"></p>
-      </form>
-    </section>
-
-    <section class="preview">
-      <div class="result-layout">
-        <article class="surface">
-          <div class="surface-header">
-            <h2 class="surface-title">公众号文案</h2>
-          </div>
-          <div class="surface-body" id="articlePreview">
-            <div class="empty">生成后会显示标题、摘要和正文。</div>
-          </div>
-        </article>
-
-        <aside class="surface">
-          <div class="surface-header">
-            <h2 class="surface-title">海报预览</h2>
-          </div>
-          <div class="surface-body" id="posterPreview">
-            <div class="empty">生成后会显示海报图片。</div>
-          </div>
-        </aside>
-
-        <aside class="surface">
-          <div class="surface-header">
-            <h2 class="surface-title">封面海报</h2>
-          </div>
-          <div class="surface-body" id="coverPreview">
-            <div class="empty">生成后会显示横版封面。</div>
-          </div>
-        </aside>
-
-        <aside class="surface">
-          <div class="surface-header">
-            <h2 class="surface-title">脱敏公众号海报</h2>
-          </div>
-          <div class="surface-body" id="publicPreview">
-            <div class="empty">点击“生成脱敏公众号”后会显示新版脱敏长海报。</div>
-          </div>
-        </aside>
-
-        <aside class="surface">
-          <div class="surface-header">
-            <h2 class="surface-title">小红书海报</h2>
-          </div>
-          <div class="surface-body" id="xhsPreview">
-            <div class="empty">点击“生成小红书”后会显示竖版海报。</div>
-          </div>
-        </aside>
       </div>
     </section>
+    <h2 class="stage-title" id="operating">Operating Stage</h2>
+    <form id="recruitmentForm">
+      <section class="form-layout">
+        <div class="main-column">
+          <div class="section"><h2 class="section-title">基本信息</h2><div class="grid"><div class="field"><label for="city">*城市名称</label><input id="city" name="city" value="杭州" required></div><div class="field"><label for="game_category">*游戏品类/名称</label><input id="game_category" name="game_category" value="燕云十六声" required></div><div class="field"><label for="poster_date">*海报展示日期</label><input id="poster_date" name="poster_date" value="5.19-5.20" placeholder="例如：5.19-5.20"></div></div><div class="field"><label for="activity_date">*活动完整时间</label><textarea id="activity_date" name="activity_date" required>5月19日（周二）或 5月20日（周三），下午14:30-18:00</textarea></div></div>
+          <div class="section"><h2 class="section-title">活动详情</h2><div class="grid"><div class="field"><label for="duration">*测试时长</label><textarea id="duration" name="duration" required>3.5H</textarea></div><div class="field"><label for="reward_amount">*礼金</label><textarea id="reward_amount" name="reward_amount" required>200元+50元交通补贴</textarea></div><div class="field"><label for="project_id">*项目编号</label><input id="project_id" name="project_id" value="20260526" required></div></div><div class="field"><label for="location">*活动地点</label><textarea id="location" name="location" required>杭州滨江网易大厦一期（网商路599号）</textarea></div><div class="field"><label for="activity_description">*活动内容</label><textarea id="activity_description" name="activity_description" required>体验部分新内容，并给出自己的看法和建议</textarea></div><div class="field tall"><label for="extra_notes">补充说明（可选）</label><textarea id="extra_notes" name="extra_notes" placeholder="可选"></textarea></div><label class="check-row" for="use_llm"><input id="use_llm" name="use_llm" type="checkbox" value="true">使用 LLM 润色文案</label></div>
+          <div class="grid two"><div class="section"><h2 class="section-title">封面海报</h2><label class="check-row" for="include_cover"><input id="include_cover" name="include_cover" type="checkbox" value="true" checked>同时生成横版封面海报</label><div class="field"><label for="cover_deadline">*活动截止日期</label><input id="cover_deadline" name="cover_deadline" value="5月19日" placeholder="例如：6月4日"></div><div class="field"><label for="cover_title">封面标题</label><textarea id="cover_title" name="cover_title">招募杭州游戏玩家
+参与线下游戏体验</textarea></div></div><div class="section"><h2 class="section-title">二维码</h2><div class="field"><label for="signup_link">报名链接</label><input id="signup_link" name="signup_link" placeholder="粘贴报名问卷链接"></div><div class="field"><label for="public_signup_link">脱敏报名链接</label><input id="public_signup_link" name="public_signup_link" placeholder="粘贴水哥公众号使用的报名链接"></div><div class="grid two"><div class="field"><label for="signup_qr">报名二维码上传</label><input id="signup_qr" name="signup_qr" type="file" accept="image/png,image/jpeg,image/jpg"></div><div class="field"><label for="public_signup_qr">脱敏二维码上传</label><input id="public_signup_qr" name="public_signup_qr" type="file" accept="image/png,image/jpeg,image/jpg"></div><div class="field"><label for="community_qr">社群二维码上传</label><input id="community_qr" name="community_qr" type="file" accept="image/png,image/jpeg,image/jpg"></div><div class="field"><label for="public_community_qr">脱敏社群二维码上传</label><input id="public_community_qr" name="public_community_qr" type="file" accept="image/png,image/jpeg,image/jpg"></div></div></div></div>
+        </div>
+        <aside class="side-column"><div class="section"><h2 class="section-title">玩家要求</h2><div class="field"><label for="player_type_count">*玩家类型数量</label><input id="player_type_count" type="number" min="1" max="6" value="1"></div><div class="type-list" id="playerTypeList"></div><div class="field tall"><label for="player_requirement_desc">合并后的玩家要求</label><textarea id="player_requirement_desc" name="player_requirement_desc" required></textarea></div><div class="field"><label for="game_examples">游戏举例 *</label><input id="game_examples" name="game_examples" value="燕云十六声" required></div></div></aside>
+      </section>
+      <div class="tools"><div class="actions"><div class="action-group"><button class="primary micro-action" id="generateBtn" type="submit">生成预览</button><button class="secondary micro-action" id="publicBtn" type="button">生成脱敏公众号</button><button class="secondary micro-action" id="xhsBtn" type="button">生成小红书</button></div><div class="action-group"><button class="secondary" id="publishBtn" type="button" disabled>推送草稿箱</button><button class="secondary" id="publishPublicBtn" type="button" disabled>推送脱敏草稿</button></div><div class="action-group downloads"><a class="button-link secondary" id="downloadBtn" href="#" download hidden>下载海报</a><a class="button-link secondary" id="downloadCoverBtn" href="#" download hidden>下载封面</a><a class="button-link secondary" id="downloadPublicBtn" href="#" download hidden>下载脱敏海报</a><a class="button-link secondary" id="downloadPublicCoverBtn" href="#" download hidden>下载脱敏封面</a><a class="button-link secondary" id="downloadXhsBtn" href="#" download hidden>下载小红书</a></div></div><p class="status" id="status"></p></div>
+    </form>
+    <section class="preview" id="draft"><div class="preview-head"><h2>Draft Preview</h2><div class="preview-tabs"><button class="preview-tab active" type="button" data-preview="outputSurface">本次输出</button><button class="preview-tab" type="button" data-preview="posterSurface">公众号海报</button><button class="preview-tab" type="button" data-preview="coverSurface">封面海报</button><button class="preview-tab" type="button" data-preview="publicSurface">脱敏海报</button><button class="preview-tab" type="button" data-preview="xhsSurface">小红书</button></div></div><div class="result-layout"><article class="surface output-surface active" id="outputSurface"><div class="surface-header"><h2 class="surface-title">本次输出</h2></div><div class="surface-body" id="articlePreview"><div class="empty">生成后会显示本次输出的封面、海报和草稿状态。</div></div></article><aside class="surface" id="posterSurface"><div class="surface-header"><h2 class="surface-title">公众号海报</h2></div><div class="surface-body" id="posterPreview"><div class="empty">生成后会显示公众号长海报。</div></div></aside><aside class="surface" id="coverSurface"><div class="surface-header"><h2 class="surface-title">封面海报</h2></div><div class="surface-body" id="coverPreview"><div class="empty">生成后会显示横版封面。</div></div></aside><aside class="surface" id="publicSurface"><div class="surface-header"><h2 class="surface-title">脱敏公众号海报</h2></div><div class="surface-body" id="publicPreview"><div class="empty">点击“生成脱敏公众号”后会显示脱敏长海报。</div></div></aside><aside class="surface" id="xhsSurface"><div class="surface-header"><h2 class="surface-title">小红书海报</h2></div><div class="surface-body" id="xhsPreview"><div class="empty">点击“生成小红书”后会显示竖版海报。</div></div></aside></div></section>
+    <div class="history-drawer" id="historyDrawer" aria-hidden="true">
+      <div class="history-backdrop" data-history-close></div>
+      <aside class="history-panel" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+        <div class="history-head">
+          <h2 id="historyTitle">历史记录</h2>
+          <div class="history-actions"><button class="history-import" type="button" id="importHistoryBtn">导入本地历史</button><button class="history-close" type="button" data-history-close aria-label="关闭">×</button></div>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </aside>
+    </div>
   </main>
-
   <script>
     const form = document.getElementById("recruitmentForm");
     const statusEl = document.getElementById("status");
     const generateBtn = document.getElementById("generateBtn");
-    const copyBtn = document.getElementById("copyBtn");
     const publishBtn = document.getElementById("publishBtn");
     const publicBtn = document.getElementById("publicBtn");
     const publishPublicBtn = document.getElementById("publishPublicBtn");
@@ -501,6 +575,7 @@
     const downloadBtn = document.getElementById("downloadBtn");
     const downloadCoverBtn = document.getElementById("downloadCoverBtn");
     const downloadPublicBtn = document.getElementById("downloadPublicBtn");
+    const downloadPublicCoverBtn = document.getElementById("downloadPublicCoverBtn");
     const downloadXhsBtn = document.getElementById("downloadXhsBtn");
     const articlePreview = document.getElementById("articlePreview");
     const posterPreview = document.getElementById("posterPreview");
@@ -512,153 +587,397 @@
     const playerTypeCountInput = document.getElementById("player_type_count");
     const playerTypeList = document.getElementById("playerTypeList");
     const playerRequirementInput = document.getElementById("player_requirement_desc");
+    const quickSearchForm = document.getElementById("quickSearchForm");
+    const quickSearchInput = document.getElementById("quickSearchInput");
     let latestContentHtml = "";
     let latestPreview = null;
     let latestPublicPreview = null;
     let playerRequirementManuallyEdited = false;
-
-    cityInput.addEventListener("input", () => {
-      if (!coverTitleInput.dataset.edited) {
-        coverTitleInput.value = `招募${cityInput.value || "城市"}游戏玩家\n参与线下游戏体验`;
+    const dashboardKey = "recruitmentWorkbenchDownloadStats.v1";
+    const historyKey = "recruitmentWorkbenchHistory.v1";
+    const historyDrawer = document.getElementById("historyDrawer");
+    const historyTitle = document.getElementById("historyTitle");
+    const historyList = document.getElementById("historyList");
+    const importHistoryBtn = document.getElementById("importHistoryBtn");
+    const channels = [
+      { key: "ux", label: "UX", color: "#99cdd8" },
+      { key: "public", label: "水哥", color: "#f8c8b2" },
+      { key: "xhs", label: "小红书", color: "#657166" },
+    ];
+    const gameHeroOptions = [
+      { title: "燕云十六声玩家招募", bg: "linear-gradient(135deg, #99cdd8, #fef5e9 54%, #657166)" },
+      { title: "第五人格玩家调研", bg: "linear-gradient(135deg, #657166, #e0e9da 56%, #f8c8b2)" },
+      { title: "逆水寒手游体验招募", bg: "linear-gradient(135deg, #e0e9da, #fef5e9 50%, #99cdd8)" },
+      { title: "蛋仔派对用户访谈", bg: "linear-gradient(135deg, #fde8d3, #f8c8b2 52%, #99cdd8)" },
+      { title: "阴阳师玩家共创", bg: "linear-gradient(135deg, #657166, #99cdd8 48%, #fef5e9)" },
+    ];
+    function todayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+    function displayDate() {
+      const now = new Date();
+      return `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, "0")}月${String(now.getDate()).padStart(2, "0")}日`;
+    }
+    function loadDashboardStats() {
+      const fallback = { total: { ux: 0, public: 0, xhs: 0 }, days: {} };
+      try {
+        return { ...fallback, ...JSON.parse(localStorage.getItem(dashboardKey) || "{}") };
+      } catch (_) {
+        return fallback;
       }
+    }
+    function saveDashboardStats(stats) {
+      localStorage.setItem(dashboardKey, JSON.stringify(stats));
+    }
+    function recordDownload(channel) {
+      const stats = loadDashboardStats();
+      const day = todayKey();
+      stats.total ||= { ux: 0, public: 0, xhs: 0 };
+      stats.days ||= {};
+      stats.days[day] ||= { ux: 0, public: 0, xhs: 0 };
+      stats.total[channel] = (stats.total[channel] || 0) + 1;
+      stats.days[day][channel] = (stats.days[day][channel] || 0) + 1;
+      saveDashboardStats(stats);
+      updateDashboard();
+    }
+    function getLastSevenDays() {
+      return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (6 - index));
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+        return { key, label: `${date.getMonth() + 1}.${date.getDate()}` };
+      });
+    }
+    function channelTotal(stats, key) {
+      return Number(stats.total?.[key] || 0);
+    }
+    function dayChannel(stats, day, key) {
+      return Number(stats.days?.[day]?.[key] || 0);
+    }
+    function renderDonut(stats) {
+      const total = channels.reduce((sum, channel) => sum + channelTotal(stats, channel.key), 0);
+      let cursor = 0;
+      const slices = channels.map((channel) => {
+        const value = total ? channelTotal(stats, channel.key) / total * 100 : 100 / channels.length;
+        const start = cursor;
+        cursor += value;
+        return `${channel.color} ${start}% ${cursor}%`;
+      });
+      document.getElementById("channelDonut").style.background = `conic-gradient(${slices.join(",")})`;
+      document.getElementById("channelLegend").innerHTML = channels.map((channel) => {
+        const count = channelTotal(stats, channel.key);
+        const pct = total ? Math.round(count / total * 100) : 0;
+        return `<span><i style="background:${channel.color}"></i>${channel.label} ${count}张 · ${pct}%</span>`;
+      }).join("");
+    }
+    function renderTrend(svgId, width, height, stats) {
+      const svg = document.getElementById(svgId);
+      const days = getLastSevenDays();
+      const pad = { left: 38, right: 18, top: 28, bottom: 34 };
+      const innerW = width - pad.left - pad.right;
+      const innerH = height - pad.top - pad.bottom;
+      const maxValue = Math.max(1, ...days.flatMap((day) => channels.map((channel) => dayChannel(stats, day.key, channel.key))));
+      const x = (index) => pad.left + (innerW / Math.max(1, days.length - 1)) * index;
+      const y = (value) => pad.top + innerH - (value / maxValue) * innerH;
+      const grid = [0, .25, .5, .75, 1].map((ratio) => `<line x1="${pad.left}" y1="${pad.top + innerH * ratio}" x2="${width - pad.right}" y2="${pad.top + innerH * ratio}" stroke="#dad6ce" stroke-width="1"/>`).join("");
+      const labels = days.map((day, index) => `<text x="${x(index)}" y="${height - 8}" text-anchor="middle" fill="#77736d" font-size="11">${day.label}</text>`).join("");
+      const lines = channels.map((channel) => {
+        const points = days.map((day, index) => `${x(index)},${y(dayChannel(stats, day.key, channel.key))}`).join(" ");
+        const dots = days.map((day, index) => `<circle cx="${x(index)}" cy="${y(dayChannel(stats, day.key, channel.key))}" r="4" fill="${channel.color}"/>`).join("");
+        return `<polyline points="${points}" fill="none" stroke="${channel.color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+      }).join("");
+      svg.innerHTML = `${grid}${labels}${lines}`;
+    }
+    function loadHistory() {
+      const fallback = { ux: [], public: [], xhs: [] };
+      try {
+        return { ...fallback, ...JSON.parse(localStorage.getItem(historyKey) || "{}") };
+      } catch (_) {
+        return fallback;
+      }
+    }
+    function saveHistoryStore(store) {
+      localStorage.setItem(historyKey, JSON.stringify(store));
+    }
+    function saveHistory(channel, item) {
+      const store = loadHistory();
+      store[channel] ||= [];
+      const normalized = {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        createdAt: new Date().toISOString(),
+        title: item.title || "未命名记录",
+        digest: item.digest || "",
+        images: (item.images || []).filter((image) => image && image.url),
+      };
+      if (!normalized.images.length) return;
+      store[channel] = [normalized, ...store[channel]].slice(0, 40);
+      saveHistoryStore(store);
+    }
+    function deleteHistoryItem(channel, id) {
+      const store = loadHistory();
+      store[channel] = (store[channel] || []).filter((item) => item.id !== id);
+      saveHistoryStore(store);
+      openHistory(channel);
+      statusEl.textContent = "历史记录已删除，原始图片文件仍保留。";
+      statusEl.className = "status";
+    }
+    function formatHistoryTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return `${date.getMonth() + 1}.${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+    function openHistory(channel) {
+      const labels = { ux: "UX 历史生成", public: "水哥脱敏历史", xhs: "小红书历史生成" };
+      const store = loadHistory();
+      const items = store[channel] || [];
+      historyTitle.textContent = labels[channel] || "历史记录";
+      historyDrawer.dataset.channel = channel;
+      historyList.innerHTML = items.length ? items.map((item) => {
+        const images = item.images.map((image) => `<a class="history-image-link" href="${image.url}" target="_blank" rel="noreferrer"><img src="${image.url}" alt="${escapeAttribute(image.label || item.title)}"><span>${escapeHtml(image.label || "查看图片")}</span></a>`).join("");
+        return `<article class="history-card"><div class="history-card-head"><div><h3>${escapeHtml(item.title)}</h3><p class="history-meta">${formatHistoryTime(item.createdAt)}${item.digest ? ` · ${escapeHtml(item.digest)}` : ""}</p></div><button class="history-delete" type="button" data-history-delete="${escapeAttribute(item.id)}" aria-label="删除这条历史">×</button></div><div class="history-images">${images}</div></article>`;
+      }).join("") : `<div class="history-empty">这里还没有记录。生成一次对应类型的海报后，会自动存到这里。</div>`;
+      historyList.querySelectorAll("[data-history-delete]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          deleteHistoryItem(channel, button.dataset.historyDelete);
+        });
+      });
+      historyDrawer.classList.add("open");
+      historyDrawer.setAttribute("aria-hidden", "false");
+    }
+    function closeHistory() {
+      historyDrawer.classList.remove("open");
+      historyDrawer.setAttribute("aria-hidden", "true");
+    }
+    function mergeImportedHistory(importedHistory) {
+      const store = loadHistory();
+      ["ux", "public", "xhs"].forEach((channel) => {
+        const existing = store[channel] || [];
+        const existingIds = new Set(existing.map((item) => item.id));
+        const incoming = (importedHistory[channel] || []).filter((item) => !existingIds.has(item.id));
+        store[channel] = [...incoming, ...existing].slice(0, 120);
+      });
+      saveHistoryStore(store);
+      return store;
+    }
+    async function importGeneratedHistory() {
+      importHistoryBtn.disabled = true;
+      importHistoryBtn.textContent = "导入中...";
+      try {
+        const response = await fetch("/recruitment/import-generated-history");
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.detail || "导入本地历史失败");
+        mergeImportedHistory(result.history || {});
+        const activeChannel = historyDrawer.dataset.channel || "ux";
+        openHistory(activeChannel);
+        statusEl.textContent = "本地历史已导入。";
+        statusEl.className = "status";
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = "status error";
+      } finally {
+        importHistoryBtn.disabled = false;
+        importHistoryBtn.textContent = "导入本地历史";
+      }
+    }
+    async function renderFeatureGame() {
+      const fallback = gameHeroOptions[Math.floor(Math.random() * gameHeroOptions.length)];
+      let item = fallback;
+      try {
+        const response = await fetch(`/static/game-pictures/manifest.json?t=${Date.now()}`);
+        const pictures = await response.json();
+        if (Array.isArray(pictures) && pictures.length) {
+          item = pictures[Math.floor(Math.random() * pictures.length)];
+        }
+      } catch (_) {
+        item = fallback;
+      }
+      document.getElementById("gameHeroTitle").textContent = item.url ? "" : fallback.title;
+      document.getElementById("gameHero").style.setProperty("--game-bg", item.url ? `url('${item.url}')` : item.bg);
+    }
+    function updateDashboard() {
+      const stats = loadDashboardStats();
+      const day = todayKey();
+      const todayTotal = channels.reduce((sum, channel) => sum + dayChannel(stats, day, channel.key), 0);
+      const allTotal = channels.reduce((sum, channel) => sum + channelTotal(stats, channel.key), 0);
+      document.getElementById("todayText").textContent = displayDate();
+      document.getElementById("todayPublishedText").textContent = `今日发布${todayTotal}篇`;
+      document.getElementById("totalPublishedText").textContent = `累计发布${allTotal}篇`;
+      document.getElementById("uxCount").textContent = channelTotal(stats, "ux");
+      document.getElementById("publicCount").textContent = channelTotal(stats, "public");
+      document.getElementById("xhsCount").textContent = channelTotal(stats, "xhs");
+      renderDonut(stats);
+      renderTrend("trendChart", 420, 250, stats);
+      renderTrend("channelTrendChart", 560, 260, stats);
+    }
+    renderFeatureGame();
+    updateDashboard();
+    downloadBtn.addEventListener("click", () => recordDownload("ux"));
+    downloadPublicBtn.addEventListener("click", () => recordDownload("public"));
+    downloadXhsBtn.addEventListener("click", () => recordDownload("xhs"));
+    document.querySelectorAll(".nav-list a").forEach((link) => {
+      link.addEventListener("click", () => {
+        document.querySelectorAll(".nav-list a").forEach((item) => item.classList.remove("is-active"));
+        link.classList.add("is-active");
+      });
     });
-
-    coverTitleInput.addEventListener("input", () => {
-      coverTitleInput.dataset.edited = "true";
+    function editDashboardCount(channelKey, label) {
+      const stats = loadDashboardStats();
+      const current = channelTotal(stats, channelKey);
+      const input = window.prompt(`修改${label}累计发布数`, String(current));
+      if (input === null) return;
+      const next = Math.max(0, Math.floor(Number(input)));
+      if (!Number.isFinite(next)) {
+        statusEl.textContent = "请输入有效数字。";
+        statusEl.className = "status error";
+        return;
+      }
+      const day = todayKey();
+      stats.total ||= { ux: 0, public: 0, xhs: 0 };
+      stats.days ||= {};
+      stats.days[day] ||= { ux: 0, public: 0, xhs: 0 };
+      const delta = next - current;
+      stats.total[channelKey] = next;
+      stats.days[day][channelKey] = Math.max(0, (stats.days[day][channelKey] || 0) + delta);
+      saveDashboardStats(stats);
+      updateDashboard();
+      statusEl.textContent = `${label}数据已更新。`;
+      statusEl.className = "status";
+    }
+    document.querySelectorAll(".metric-card").forEach((card, index) => {
+      const channel = channels[index];
+      card.title = "点击修改数据";
+      card.addEventListener("click", () => {
+        if (!channel) return;
+        document.querySelectorAll(".metric-card").forEach((item) => item.classList.remove("is-active"));
+        card.classList.add("is-active");
+        editDashboardCount(channel.key, channel.label);
+      });
     });
-
+    document.querySelectorAll("[data-history-channel]").forEach((button) => {
+      button.addEventListener("click", () => openHistory(button.dataset.historyChannel));
+    });
+    document.querySelectorAll("[data-history-close]").forEach((button) => button.addEventListener("click", closeHistory));
+    importHistoryBtn.addEventListener("click", importGeneratedHistory);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeHistory();
+    });
+    const searchTargets = [
+      { keys: ["基础", "基本", "城市", "游戏品类", "品类", "展示日期"], selector: "#city" },
+      { keys: ["活动时间", "时间", "日期"], selector: "#activity_date" },
+      { keys: ["玩家要求", "要求", "玩家", "类型"], selector: "#player_requirement_desc" },
+      { keys: ["测试时长", "时长"], selector: "#duration" },
+      { keys: ["礼金", "报酬", "交通补贴"], selector: "#reward_amount" },
+      { keys: ["活动地点", "地点", "地址"], selector: "#location" },
+      { keys: ["活动内容", "内容"], selector: "#activity_description" },
+      { keys: ["项目编号", "编号"], selector: "#project_id" },
+      { keys: ["封面", "封面海报", "截止"], selector: "#cover_deadline" },
+      { keys: ["二维码", "报名链接", "脱敏报名", "社群"], selector: "#signup_link" },
+      { keys: ["预览", "draft", "海报预览"], selector: "#draft" },
+      { keys: ["历史", "ux", "水哥", "小红书"], selector: ".channel-tabs" },
+    ];
+    function findSearchTarget(query) {
+      const normalized = query.trim().toLowerCase();
+      if (!normalized) return null;
+      return searchTargets.find((target) => target.keys.some((key) => normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)));
+    }
+    function jumpToSearchTarget(query) {
+      const target = findSearchTarget(query);
+      if (!target) {
+        statusEl.textContent = "暂时没有找到对应模块，可以试试：活动时间、活动地点、礼金、二维码、玩家要求。";
+        statusEl.className = "status error";
+        return;
+      }
+      const element = document.querySelector(target.selector);
+      if (!element) return;
+      const highlight = element.closest(".section, .chart-card, .surface, .metric-row, .channel-tabs") || element;
+      highlight.classList.remove("jump-highlight");
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => highlight.classList.add("jump-highlight"), 260);
+      if (typeof element.focus === "function" && ["INPUT", "TEXTAREA", "BUTTON"].includes(element.tagName)) {
+        window.setTimeout(() => element.focus({ preventScroll: true }), 520);
+      }
+      statusEl.textContent = `已定位：${query}`;
+      statusEl.className = "status";
+    }
+    quickSearchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      jumpToSearchTarget(quickSearchInput.value);
+    });
+    document.querySelectorAll(".preview-tab").forEach((button) => button.addEventListener("click", () => showPreview(button.dataset.preview)));
+    function showPreview(id) {
+      document.querySelectorAll(".surface").forEach((surface) => surface.classList.toggle("active", surface.id === id));
+      document.querySelectorAll(".preview-tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.preview === id));
+      document.getElementById("draft")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    cityInput.addEventListener("input", () => { if (!coverTitleInput.dataset.edited) coverTitleInput.value = `招募${cityInput.value || "城市"}游戏玩家\n参与线下游戏体验`; });
+    coverTitleInput.addEventListener("input", () => { coverTitleInput.dataset.edited = "true"; });
     playerTypeCountInput.addEventListener("input", renderPlayerTypeInputs);
-    playerRequirementInput.addEventListener("input", () => {
-      playerRequirementManuallyEdited = true;
-    });
-
+    playerRequirementInput.addEventListener("input", () => { playerRequirementManuallyEdited = true; });
+    const defaultPlayerTypes = [
+      { name: "燕云十六声玩家", detail: "目前正在玩燕云且体验时间2个月以上（PC端/移动端均可）" },
+      { name: "其他类型玩家", detail: "有其他品类体验经历" },
+    ];
     function renderPlayerTypeInputs() {
       const count = Math.min(Math.max(Number(playerTypeCountInput.value) || 1, 1), 6);
-      const existing = Array.from(playerTypeList.querySelectorAll(".type-item")).map((item) => ({
-        name: item.querySelector(".player-type-name")?.value || "",
-        detail: item.querySelector(".player-type-detail")?.value || "",
-      }));
-
+      const existing = Array.from(playerTypeList.querySelectorAll(".type-item")).map((item) => ({ name: item.querySelector(".player-type-name")?.value || "", detail: item.querySelector(".player-type-detail")?.value || "" }));
       playerTypeList.innerHTML = "";
       for (let index = 0; index < count; index += 1) {
         const saved = existing[index] || defaultPlayerTypes[index] || { name: "", detail: "" };
         const item = document.createElement("div");
         item.className = "type-item";
-        item.innerHTML = `
-          <p class="type-item-title">玩家类型 ${index + 1}</p>
-          <div class="grid">
-            <div class="field">
-              <label>类型名称 *</label>
-              <input class="player-type-name" value="${escapeAttribute(saved.name)}" placeholder="例如：自走棋游戏玩家">
-            </div>
-            <div class="field">
-              <label>要求描述</label>
-              <textarea class="player-type-detail" placeholder="例如：金铲铲、多多自走棋等">${escapeHtml(saved.detail)}</textarea>
-            </div>
-          </div>
-        `;
-        item.querySelectorAll("input, textarea").forEach((input) => {
-          input.addEventListener("input", updatePlayerRequirement);
-        });
+        item.innerHTML = `<p class="type-item-title">玩家类型 ${index + 1}</p><div class="field"><label>类型名称 *</label><input class="player-type-name" value="${escapeAttribute(saved.name)}" placeholder="例如：自走棋游戏玩家"></div><div class="field"><label>要求描述</label><textarea class="player-type-detail" placeholder="例如：金铲铲、多多自走棋等">${escapeHtml(saved.detail)}</textarea></div>`;
+        item.querySelectorAll("input, textarea").forEach((input) => input.addEventListener("input", updatePlayerRequirement));
         playerTypeList.appendChild(item);
       }
       updatePlayerRequirement({ force: !playerRequirementManuallyEdited });
     }
-
     function updatePlayerRequirement(options = {}) {
-      if (playerRequirementManuallyEdited && !options.force) {
-        return;
-      }
-      const lines = Array.from(playerTypeList.querySelectorAll(".type-item"))
-        .map((item) => {
-          const name = item.querySelector(".player-type-name").value.trim();
-          const detail = item.querySelector(".player-type-detail").value.trim();
-          if (name && detail) return `${name}：${detail}`;
-          if (name) return name;
-          if (detail) return detail;
-          return "";
-        })
-        .filter(Boolean);
+      if (playerRequirementManuallyEdited && !options.force) return;
+      const lines = Array.from(playerTypeList.querySelectorAll(".type-item")).map((item) => {
+        const name = item.querySelector(".player-type-name").value.trim();
+        const detail = item.querySelector(".player-type-detail").value.trim();
+        if (name && detail) return `${name}：${detail}`;
+        if (name) return name;
+        if (detail) return detail;
+        return "";
+      }).filter(Boolean);
       playerRequirementInput.value = lines.join("\n");
     }
-
-    const defaultPlayerTypes = [
-      {
-        name: "燕云十六声玩家",
-        detail: "目前正在玩燕云且体验时间2个月以上（PC端/移动端均可）",
-      },
-      {
-        name: "其他类型玩家",
-        detail: "有其他品类体验经历",
-      },
-    ];
-
     renderPlayerTypeInputs();
-
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       updatePlayerRequirement();
       statusEl.textContent = "正在生成文案和海报...";
       statusEl.className = "status";
       generateBtn.disabled = true;
-      copyBtn.disabled = true;
       publishBtn.disabled = true;
       publishPublicBtn.disabled = true;
       downloadBtn.hidden = true;
       downloadCoverBtn.hidden = true;
-
+      downloadPublicCoverBtn.hidden = true;
       const data = new FormData(form);
       data.set("include_poster", "true");
       data.set("include_cover", document.getElementById("include_cover").checked ? "true" : "false");
       data.set("use_llm", document.getElementById("use_llm").checked ? "true" : "false");
-
       try {
-        const response = await fetch("/recruitment/generate-preview", {
-          method: "POST",
-          body: data,
-        });
+        const response = await fetch("/recruitment/generate-preview", { method: "POST", body: data });
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.detail || "生成失败");
-        }
-
+        if (!response.ok) throw new Error(result.detail || "生成失败");
         latestContentHtml = result.content_html || "";
         latestPreview = result;
-        articlePreview.innerHTML = `
-          <h3 class="article-title">${escapeHtml(result.title)}</h3>
-          <p class="digest">${escapeHtml(result.digest)}</p>
-          <div class="article">${result.content_html}</div>
-        `;
-
-        if (result.poster_image_url) {
-          const imageUrl = `${result.poster_image_url}?t=${Date.now()}`;
-          posterPreview.innerHTML = `<img class="poster" src="${imageUrl}" alt="招募海报">`;
-          downloadBtn.href = result.poster_image_url;
-          downloadBtn.hidden = false;
-        } else {
-          posterPreview.innerHTML = `<div class="empty">没有生成海报。</div>`;
-        }
-
-        if (result.cover_image_url) {
-          const coverUrl = `${result.cover_image_url}?t=${Date.now()}`;
-          coverPreview.innerHTML = `<img class="cover-image" src="${coverUrl}" alt="封面海报">`;
-          downloadCoverBtn.href = result.cover_image_url;
-          downloadCoverBtn.hidden = false;
-        } else {
-          coverPreview.innerHTML = `<div class="empty">没有生成封面。</div>`;
-        }
-
-        copyBtn.disabled = false;
+        const posterUrl = result.poster_image_url ? `${result.poster_image_url}?t=${Date.now()}` : "";
+        const coverUrlForSummary = result.cover_image_url ? `${result.cover_image_url}?t=${Date.now()}` : "";
+        articlePreview.innerHTML = `<div class="output-summary"><h3 class="article-title">${escapeHtml(result.title)}</h3><p class="digest">${escapeHtml(result.digest)}</p><div class="output-note"><strong>公众号预览已生成</strong>下方可以切换查看正文长海报和封面图。推送草稿箱时，正文会使用海报图片。</div><div class="preview-pair">${coverUrlForSummary ? `<div><p class="preview-block-title">封面</p><img class="preview-cover-small" src="${coverUrlForSummary}" alt="封面海报"></div>` : ""}${posterUrl ? `<div><p class="preview-block-title">正文海报</p><img class="preview-poster-small" src="${posterUrl}" alt="正文海报"></div>` : ""}</div></div>`;
+        if (result.poster_image_url) { posterPreview.innerHTML = `<img class="poster" src="${posterUrl}" alt="招募海报">`; downloadBtn.href = result.poster_image_url; downloadBtn.hidden = false; } else { posterPreview.innerHTML = `<div class="empty">没有生成海报。</div>`; }
+        if (result.cover_image_url) { const coverUrl = `${result.cover_image_url}?t=${Date.now()}`; coverPreview.innerHTML = `<img class="cover-image" src="${coverUrl}" alt="封面海报">`; downloadCoverBtn.href = result.cover_image_url; downloadCoverBtn.hidden = false; } else { coverPreview.innerHTML = `<div class="empty">没有生成封面。</div>`; }
         publishBtn.disabled = false;
         statusEl.textContent = "预览生成成功。";
-      } catch (error) {
-        statusEl.textContent = error.message;
-        statusEl.className = "status error";
-      } finally {
-        generateBtn.disabled = false;
-      }
+        showPreview("outputSurface");
+      } catch (error) { statusEl.textContent = error.message; statusEl.className = "status error"; } finally { generateBtn.disabled = false; }
     });
-
     publicBtn.addEventListener("click", async () => {
       updatePlayerRequirement();
       statusEl.textContent = "正在生成脱敏公众号海报...";
@@ -666,86 +985,57 @@
       publicBtn.disabled = true;
       publishPublicBtn.disabled = true;
       downloadPublicBtn.hidden = true;
-
+      downloadPublicCoverBtn.hidden = true;
       const data = new FormData(form);
-
       try {
-        const response = await fetch("/recruitment/generate-public-preview", {
-          method: "POST",
-          body: data,
-        });
+        const response = await fetch("/recruitment/generate-public-preview", { method: "POST", body: data });
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.detail || "脱敏公众号海报生成失败");
-        }
-
+        if (!response.ok) throw new Error(result.detail || "脱敏公众号海报生成失败");
         latestPublicPreview = result;
         const imageUrl = `${result.public_poster_image_url}?t=${Date.now()}`;
+        const publicCoverUrl = `${result.public_cover_image_url}?t=${Date.now()}`;
+        articlePreview.innerHTML = `<div class="output-summary"><h3 class="article-title">${escapeHtml(result.title || "脱敏公众号预览")}</h3><p class="digest">${escapeHtml(result.digest || "")}</p><div class="output-note"><strong>脱敏公众号已生成</strong>封面会放到公众号封面，正文只放脱敏长海报图片。</div><div class="preview-pair"><div><p class="preview-block-title">公众号封面</p><img class="preview-cover-small" src="${publicCoverUrl}" alt="脱敏公众号封面"></div><div><p class="preview-block-title">正文海报</p><img class="preview-poster-small" src="${imageUrl}" alt="脱敏公众号正文海报"></div></div></div>`;
         publicPreview.innerHTML = `<img class="poster" src="${imageUrl}" alt="脱敏公众号海报">`;
+        coverPreview.innerHTML = `<img class="cover-image" src="${publicCoverUrl}" alt="脱敏公众号封面">`;
         downloadPublicBtn.href = result.public_poster_image_url;
         downloadPublicBtn.hidden = false;
+        downloadPublicCoverBtn.href = result.public_cover_image_url;
+        downloadPublicCoverBtn.hidden = false;
+        saveHistory("public", { title: result.title || "脱敏公众号预览", digest: result.digest || "", images: [
+          result.public_cover_image_url ? { label: "脱敏封面", url: publicCoverUrl } : null,
+          result.public_poster_image_url ? { label: "脱敏海报", url: imageUrl } : null,
+        ] });
         publishPublicBtn.disabled = false;
         statusEl.textContent = "脱敏公众号海报生成成功。";
-      } catch (error) {
-        statusEl.textContent = error.message;
-        statusEl.className = "status error";
-      } finally {
-        publicBtn.disabled = false;
-      }
+        showPreview("publicSurface");
+      } catch (error) { statusEl.textContent = error.message; statusEl.className = "status error"; } finally { publicBtn.disabled = false; }
     });
-
     xhsBtn.addEventListener("click", async () => {
       updatePlayerRequirement();
       statusEl.textContent = "正在生成小红书海报...";
       statusEl.className = "status";
       xhsBtn.disabled = true;
       downloadXhsBtn.hidden = true;
-
       const data = new FormData(form);
-
       try {
-        const response = await fetch("/recruitment/generate-xiaohongshu-poster", {
-          method: "POST",
-          body: data,
-        });
+        const response = await fetch("/recruitment/generate-xiaohongshu-poster", { method: "POST", body: data });
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.detail || "小红书海报生成失败");
-        }
-
+        if (!response.ok) throw new Error(result.detail || "小红书海报生成失败");
         const imageUrl = `${result.xiaohongshu_image_url}?t=${Date.now()}`;
         xhsPreview.innerHTML = `<img class="xhs-image" src="${imageUrl}" alt="小红书招募海报">`;
         downloadXhsBtn.href = result.xiaohongshu_image_url;
         downloadXhsBtn.hidden = false;
         statusEl.textContent = "小红书海报生成成功。";
-      } catch (error) {
-        statusEl.textContent = error.message;
-        statusEl.className = "status error";
-      } finally {
-        xhsBtn.disabled = false;
-      }
+        showPreview("xhsSurface");
+      } catch (error) { statusEl.textContent = error.message; statusEl.className = "status error"; } finally { xhsBtn.disabled = false; }
     });
-
-    copyBtn.addEventListener("click", async () => {
-      if (!latestContentHtml) return;
-      await navigator.clipboard.writeText(latestContentHtml);
-      statusEl.textContent = "公众号正文 HTML 已复制。";
-      statusEl.className = "status";
-    });
-
     publishBtn.addEventListener("click", async () => {
       if (!latestPreview) return;
       const coverPath = latestPreview.cover_image_path || latestPreview.poster_image_path;
-      if (!coverPath) {
-        statusEl.textContent = "请先生成封面或海报，再推送草稿箱。";
-        statusEl.className = "status error";
-        return;
-      }
-
+      if (!coverPath) { statusEl.textContent = "请先生成封面或海报，再推送草稿箱。"; statusEl.className = "status error"; return; }
       publishBtn.disabled = true;
       statusEl.textContent = "正在推送到公众号草稿箱...";
       statusEl.className = "status";
-
       try {
         const payload = new FormData();
         payload.set("title", latestPreview.title || "");
@@ -753,66 +1043,31 @@
         payload.set("content_html", latestPreview.content_html || "");
         payload.set("cover_image_path", coverPath);
         payload.set("poster_image_path", latestPreview.poster_image_path || coverPath);
-
-        const response = await fetch("/recruitment/publish-preview-draft", {
-          method: "POST",
-          body: payload,
-        });
+        const response = await fetch("/recruitment/publish-preview-draft", { method: "POST", body: payload });
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.detail || "草稿推送失败");
-        }
+        if (!response.ok) throw new Error(result.detail || "草稿推送失败");
         statusEl.textContent = `草稿推送成功，draft_id：${result.draft_id || "已生成"}`;
-      } catch (error) {
-        statusEl.textContent = error.message;
-        statusEl.className = "status error";
-      } finally {
-        publishBtn.disabled = false;
-      }
+      } catch (error) { statusEl.textContent = error.message; statusEl.className = "status error"; } finally { publishBtn.disabled = false; }
     });
-
     publishPublicBtn.addEventListener("click", async () => {
       if (!latestPublicPreview) return;
       publishPublicBtn.disabled = true;
       statusEl.textContent = "正在推送脱敏公众号草稿...";
       statusEl.className = "status";
-
       try {
         const payload = new FormData();
         payload.set("title", latestPublicPreview.title || "");
         payload.set("digest", latestPublicPreview.digest || "");
         payload.set("cover_image_path", latestPublicPreview.public_cover_image_path || "");
         payload.set("poster_image_path", latestPublicPreview.public_poster_image_path || "");
-
-        const response = await fetch("/recruitment/publish-public-draft", {
-          method: "POST",
-          body: payload,
-        });
+        const response = await fetch("/recruitment/publish-public-draft", { method: "POST", body: payload });
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.detail || "脱敏草稿推送失败");
-        }
+        if (!response.ok) throw new Error(result.detail || "脱敏草稿推送失败");
         statusEl.textContent = `脱敏草稿推送成功，draft_id：${result.draft_id || "已生成"}`;
-      } catch (error) {
-        statusEl.textContent = error.message;
-        statusEl.className = "status error";
-      } finally {
-        publishPublicBtn.disabled = false;
-      }
+      } catch (error) { statusEl.textContent = error.message; statusEl.className = "status error"; } finally { publishPublicBtn.disabled = false; }
     });
-
-    function escapeHtml(value) {
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function escapeAttribute(value) {
-      return escapeHtml(value).replaceAll("\n", " ");
-    }
+    function escapeHtml(value) { return String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+    function escapeAttribute(value) { return escapeHtml(value).replaceAll("\n", " "); }
   </script>
 </body>
 </html>

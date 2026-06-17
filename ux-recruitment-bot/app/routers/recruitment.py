@@ -1,5 +1,7 @@
 import logging
+import re
 from pathlib import Path
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from typing import Optional
 from app.models.demand import DemandForm, PipelineResult, PreviewResult
@@ -8,6 +10,7 @@ from app.services.cover_service import cover_service
 from app.services.llm_service import llm_service
 from app.services.poster_service import poster_service
 from app.services.public_poster_service import public_poster_service
+from app.services.public_cover_service import public_cover_service
 from app.services.qr_service import qr_service
 from app.services.wechat_service import wechat_service
 from app.services.xiaohongshu_service import xiaohongshu_service
@@ -205,9 +208,12 @@ async def generate_public_preview(
     cover_deadline: Optional[str] = Form(default=None, description="封面活动截止日期"),
     cover_title: Optional[str] = Form(default=None, description="封面标题"),
     signup_link: Optional[str] = Form(default=None, description="报名链接"),
+    public_signup_link: Optional[str] = Form(default=None, description="脱敏公众号报名链接"),
     community_link: Optional[str] = Form(default=None, description="社群链接"),
     signup_qr: Optional[UploadFile] = File(default=None, description="报名二维码 PNG/JPG"),
+    public_signup_qr: Optional[UploadFile] = File(default=None, description="脱敏公众号报名二维码 PNG/JPG"),
     community_qr: Optional[UploadFile] = File(default=None, description="社群二维码 PNG/JPG"),
+    public_community_qr: Optional[UploadFile] = File(default=None, description="脱敏公众号社群二维码 PNG/JPG"),
 ) -> dict:
     form = DemandForm(
         city=city,
@@ -224,20 +230,24 @@ async def generate_public_preview(
     )
 
     try:
-        signup_qr_bytes = await _read_optional_image(signup_qr, "报名二维码")
-        community_qr_bytes = await _read_optional_image(community_qr, "社群二维码")
-        signup_qr_content_type = signup_qr.content_type if signup_qr_bytes and signup_qr else None
+        public_signup_qr_bytes = await _read_optional_image(public_signup_qr, "脱敏报名二维码")
+        public_community_qr_bytes = await _read_optional_image(public_community_qr, "脱敏社群二维码")
+        signup_qr_bytes = public_signup_qr_bytes or await _read_optional_image(signup_qr, "报名二维码")
+        community_qr_bytes = public_community_qr_bytes
+        signup_qr_content_type = (
+            public_signup_qr.content_type
+            if public_signup_qr_bytes and public_signup_qr
+            else signup_qr.content_type if signup_qr_bytes and signup_qr else None
+        )
         community_qr_content_type = (
-            community_qr.content_type if community_qr_bytes and community_qr else None
+            public_community_qr.content_type
+            if public_community_qr_bytes and public_community_qr
+            else None
         )
 
         if signup_qr_bytes is None:
-            signup_qr_bytes = qr_service.generate_png(signup_link)
+            signup_qr_bytes = qr_service.generate_png(public_signup_link or signup_link)
             signup_qr_content_type = "image/png" if signup_qr_bytes else None
-        if community_qr_bytes is None:
-            community_qr_bytes = qr_service.generate_png(community_link)
-            community_qr_content_type = "image/png" if community_qr_bytes else None
-
         poster_result = await public_poster_service.render_public_poster(
             form=form,
             poster_date=poster_date,
@@ -246,7 +256,7 @@ async def generate_public_preview(
             community_qr=community_qr_bytes,
             community_qr_content_type=community_qr_content_type,
         )
-        cover_result = await cover_service.render_cover(
+        cover_result = await public_cover_service.render_cover(
             form=form,
             deadline=cover_deadline,
             cover_title=cover_title or f"招募{city}游戏玩家\n参与线下游戏体验",
@@ -349,6 +359,138 @@ async def publish_preview_draft(
     except RuntimeError as e:
         logger.error(f"草稿推送失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/import-generated-history", summary="扫描本地 generated 文件夹并返回历史记录")
+async def import_generated_history() -> dict:
+    try:
+        return {
+            "success": True,
+            "history": _scan_generated_history(),
+        }
+    except RuntimeError as e:
+        logger.error(f"导入本地历史失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _scan_generated_history() -> dict:
+    covers = _scan_generated_folder("covers", "封面海报")
+    posters = _scan_generated_folder("posters", "公众号海报")
+    public_posters = _scan_generated_folder("public-posters", "脱敏海报")
+    xhs_posters = _scan_generated_folder("xiaohongshu", "小红书海报")
+
+    return {
+        "ux": _build_paired_history(
+            channel="ux",
+            title_prefix="UX 历史海报",
+            main_items=posters,
+            main_label="公众号海报",
+            paired_items=covers,
+            paired_label="封面海报",
+        ),
+        "public": _build_single_history(
+            channel="public",
+            title_prefix="水哥脱敏历史海报",
+            items=public_posters,
+            label="脱敏海报",
+        ),
+        "xhs": _build_single_history(
+            channel="xhs",
+            title_prefix="小红书历史海报",
+            items=xhs_posters,
+            label="小红书海报",
+        ),
+    }
+
+
+def _scan_generated_folder(folder: str, label: str) -> list[dict]:
+    folder_path = GENERATED_STATIC_ROOT / folder
+    if not folder_path.exists():
+        return []
+    items = []
+    for path in folder_path.glob("*.png"):
+        if not path.is_file() or path.stat().st_size <= 0:
+            continue
+        timestamp = _extract_generated_timestamp(path.name)
+        items.append(
+            {
+                "path": path,
+                "url": f"/static/generated/{folder}/{path.name}",
+                "label": label,
+                "timestamp": timestamp,
+                "createdAt": _history_created_at(path, timestamp),
+            }
+        )
+    return sorted(items, key=lambda item: item["createdAt"], reverse=True)
+
+
+def _extract_generated_timestamp(filename: str) -> int | None:
+    matches = re.findall(r"(\d{10})", filename)
+    if not matches:
+        return None
+    return int(matches[-1])
+
+
+def _history_created_at(path: Path, timestamp: int | None) -> str:
+    if timestamp:
+        try:
+            return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
+        except (OSError, OverflowError, ValueError):
+            pass
+    return datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc).isoformat()
+
+
+def _build_paired_history(
+    channel: str,
+    title_prefix: str,
+    main_items: list[dict],
+    main_label: str,
+    paired_items: list[dict],
+    paired_label: str,
+) -> list[dict]:
+    paired_pool = [item for item in paired_items if item.get("timestamp")]
+    records = []
+    for item in main_items:
+        images = []
+        pair = _find_nearest_generated_item(item, paired_pool, max_seconds=12)
+        if pair:
+            images.append({"label": paired_label, "url": pair["url"]})
+        images.append({"label": main_label, "url": item["url"]})
+        records.append(_history_record(channel, title_prefix, item, images))
+    return records[:80]
+
+
+def _build_single_history(channel: str, title_prefix: str, items: list[dict], label: str) -> list[dict]:
+    return [
+        _history_record(channel, title_prefix, item, [{"label": label, "url": item["url"]}])
+        for item in items[:80]
+    ]
+
+
+def _find_nearest_generated_item(item: dict, pool: list[dict], max_seconds: int) -> dict | None:
+    timestamp = item.get("timestamp")
+    if not timestamp:
+        return None
+    candidates = [
+        (abs(candidate["timestamp"] - timestamp), candidate)
+        for candidate in pool
+        if candidate.get("timestamp")
+    ]
+    if not candidates:
+        return None
+    delta, candidate = min(candidates, key=lambda pair: pair[0])
+    return candidate if delta <= max_seconds else None
+
+
+def _history_record(channel: str, title_prefix: str, item: dict, images: list[dict]) -> dict:
+    stem = item["path"].stem
+    return {
+        "id": f"generated-{channel}-{stem}",
+        "createdAt": item["createdAt"],
+        "title": f"{title_prefix} · {stem}",
+        "digest": "从本地 generated 文件夹导入",
+        "images": images,
+    }
 
 
 def _resolve_generated_file(file_path: str) -> Path:
